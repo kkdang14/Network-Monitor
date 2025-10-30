@@ -1,0 +1,231 @@
+2025-10-29 10:01:51,501 - WARNING - ⚠️ NOT running as Administrator - some mitigation features may be limited
+2025-10-29 10:01:51,501 - WARNING - ⚠️ For full functionality, run as Administrator (Windows) or sudo (Linux)
+2025-10-29 10:01:51,525 - INFO - ✅ Npcap detected
+2025-10-29 10:01:51,525 - INFO - Available interfaces: ['\\Device\\NPF_{57FBB57A-D862-486C-9A50-334CE4F0D575}', '\\Device\\NPF_{55AD7806-AE51-47CA-8013-B76F8518111C}', '\\Device\\NPF_{9B2F22A0-C8E5-479F-8AE9-FA3251412798}', '\\Device\\NPF_{7E5F1C8A-4C9F-4D19-9F4E-28615920595A}', '\\Device\\NPF_{487077D1-5096-44C8-BA54-610D885E0E63}', '\\Device\\NPF_{D8676F0C-7705-43EB-9A18-B730C650EA6D}', '\\Device\\NPF_{C4C19317-F2E5-4BEF-91E4-1E71C937E55E}', '\\Device\\NPF_Loopback']
+2025-10-29 10:01:52,728 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-10-29 10:01:52,861 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-10-29 10:01:52,907 - INFO -  Error loading models: [Errno 2] No such file or directory: 'scaler_apt.pkl'
+2025-10-29 10:01:52,907 - ERROR - Fatal error: [Errno 2] No such file or directory: 'scaler_apt.pkl'
+2025-10-29 10:01:52,911 - ERROR - Traceback (most recent call last):
+  File "c:\Users\HP\OneDrive\Document\Dang\CourseFile\Project\APT\APT_APP\app.py", line 912, in main
+    app = NetworkMonitorApp(root)
+  File "c:\Users\HP\OneDrive\Document\Dang\CourseFile\Project\APT\APT_APP\app.py", line 455, in __init__
+    self.scaler = joblib.load('scaler_apt.pkl')
+  File "C:\Users\HP\AppData\Local\Programs\Python\Python310\lib\site-packages\joblib\numpy_pickle.py", line 650, in load
+    with open(filename, 'rb') as f:
+FileNotFoundError: [Errno 2] No such file or directory: 'scaler_apt.pkl'
+
+2025-10-29 10:19:36,550 - INFO - ✅ Running with Administrator privileges
+2025-10-29 10:19:36,605 - INFO - ✅ Npcap detected
+2025-10-29 10:19:36,605 - INFO - Available interfaces: ['\\Device\\NPF_{57FBB57A-D862-486C-9A50-334CE4F0D575}', '\\Device\\NPF_{55AD7806-AE51-47CA-8013-B76F8518111C}', '\\Device\\NPF_{9B2F22A0-C8E5-479F-8AE9-FA3251412798}', '\\Device\\NPF_{7E5F1C8A-4C9F-4D19-9F4E-28615920595A}', '\\Device\\NPF_{487077D1-5096-44C8-BA54-610D885E0E63}', '\\Device\\NPF_{D8676F0C-7705-43EB-9A18-B730C650EA6D}', '\\Device\\NPF_{C4C19317-F2E5-4BEF-91E4-1E71C937E55E}', '\\Device\\NPF_Loopback']
+2025-10-29 10:19:38,759 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-10-29 10:19:38,922 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-10-29 10:19:38,985 - INFO -  Models and scaler loaded successfully
+2025-10-29 10:20:01,423 - INFO -  Npcap detected - using Layer 2 sniffing
+2025-10-29 10:20:01,448 - INFO -  Selected interface: Local Area Connection* 1 (IP: fe80::b6e2:7888:8c40:d5cc)
+2025-10-29 10:20:01,506 - INFO -  Started monitoring on 'Local Area Connection* 1' (Layer 2)
+2025-10-29 10:20:01,508 - INFO -  Mitigation Mode: AUTO-MITIGATION ON 
+2025-10-29 10:20:01,536 - INFO -  Waiting for network traffic...
+2025-10-29 10:20:24,177 - INFO -  Opened quarantine folder: quarantine
+2025-10-29 10:27:48,329 - INFO - ✅ Running with Administrator privileges
+2025-10-29 10:27:48,350 - INFO - ✅ Npcap detected
+2025-10-29 10:27:48,350 - INFO - Available interfaces: ['\\Device\\NPF_{57FBB57A-D862-486C-9A50-334CE4F0D575}', '\\Device\\NPF_{55AD7806-AE51-47CA-8013-B76F8518111C}', '\\Device\\NPF_{9B2F22A0-C8E5-479F-8AE9-FA3251412798}', '\\Device\\NPF_{7E5F1C8A-4C9F-4D19-9F4E-28615920595A}', '\\Device\\NPF_{487077D1-5096-44C8-BA54-610D885E0E63}', '\\Device\\NPF_{D8676F0C-7705-43EB-9A18-B730C650EA6D}', '\\Device\\NPF_{C4C19317-F2E5-4BEF-91E4-1E71C937E55E}', '\\Device\\NPF_Loopback']
+2025-10-29 10:27:49,036 - ERROR - Fatal error: 'NetworkMonitorApp' object has no attribute 'load_all_models'
+2025-10-29 10:27:49,040 - ERROR - Traceback (most recent call last):
+  File "c:\Users\HP\OneDrive\Document\Dang\CourseFile\Project\APT\APT_APP\app-2.py", line 968, in main
+    app = NetworkMonitorApp(root)
+  File "c:\Users\HP\OneDrive\Document\Dang\CourseFile\Project\APT\APT_APP\app-2.py", line 480, in __init__
+    self.load_all_models()
+AttributeError: 'NetworkMonitorApp' object has no attribute 'load_all_models'
+
+2025-10-29 10:28:20,023 - INFO - ✅ Running with Administrator privileges
+2025-10-29 10:28:20,044 - INFO - ✅ Npcap detected
+2025-10-29 10:28:20,045 - INFO - Available interfaces: ['\\Device\\NPF_{57FBB57A-D862-486C-9A50-334CE4F0D575}', '\\Device\\NPF_{55AD7806-AE51-47CA-8013-B76F8518111C}', '\\Device\\NPF_{9B2F22A0-C8E5-479F-8AE9-FA3251412798}', '\\Device\\NPF_{7E5F1C8A-4C9F-4D19-9F4E-28615920595A}', '\\Device\\NPF_{487077D1-5096-44C8-BA54-610D885E0E63}', '\\Device\\NPF_{D8676F0C-7705-43EB-9A18-B730C650EA6D}', '\\Device\\NPF_{C4C19317-F2E5-4BEF-91E4-1E71C937E55E}', '\\Device\\NPF_Loopback']
+2025-10-29 10:28:20,520 - ERROR - Fatal error: 'NetworkMonitorApp' object has no attribute 'load_all_models'
+2025-10-29 10:28:20,522 - ERROR - Traceback (most recent call last):
+  File "c:\Users\HP\OneDrive\Document\Dang\CourseFile\Project\APT\APT_APP\app-2.py", line 968, in main
+    app = NetworkMonitorApp(root)
+  File "c:\Users\HP\OneDrive\Document\Dang\CourseFile\Project\APT\APT_APP\app-2.py", line 480, in __init__
+    self.load_all_models()
+AttributeError: 'NetworkMonitorApp' object has no attribute 'load_all_models'
+
+2025-10-29 10:28:42,677 - WARNING - ⚠️ NOT running as Administrator - some mitigation features may be limited
+2025-10-29 10:28:42,678 - WARNING - ⚠️ For full functionality, run as Administrator (Windows) or sudo (Linux)
+2025-10-29 10:28:42,702 - INFO - ✅ Npcap detected
+2025-10-29 10:28:42,702 - INFO - Available interfaces: ['\\Device\\NPF_{57FBB57A-D862-486C-9A50-334CE4F0D575}', '\\Device\\NPF_{55AD7806-AE51-47CA-8013-B76F8518111C}', '\\Device\\NPF_{9B2F22A0-C8E5-479F-8AE9-FA3251412798}', '\\Device\\NPF_{7E5F1C8A-4C9F-4D19-9F4E-28615920595A}', '\\Device\\NPF_{487077D1-5096-44C8-BA54-610D885E0E63}', '\\Device\\NPF_{D8676F0C-7705-43EB-9A18-B730C650EA6D}', '\\Device\\NPF_{C4C19317-F2E5-4BEF-91E4-1E71C937E55E}', '\\Device\\NPF_Loopback']
+2025-10-29 10:28:43,305 - ERROR - Fatal error: 'NetworkMonitorApp' object has no attribute 'load_all_models'
+2025-10-29 10:28:43,308 - ERROR - Traceback (most recent call last):
+  File "c:\Users\HP\OneDrive\Document\Dang\CourseFile\Project\APT\APT_APP\app-2.py", line 951, in main
+    app = NetworkMonitorApp(root)
+  File "c:\Users\HP\OneDrive\Document\Dang\CourseFile\Project\APT\APT_APP\app-2.py", line 463, in __init__
+    self.load_all_models()
+AttributeError: 'NetworkMonitorApp' object has no attribute 'load_all_models'
+
+2025-10-29 10:30:11,287 - WARNING - ⚠️ NOT running as Administrator - some mitigation features may be limited
+2025-10-29 10:30:11,288 - WARNING - ⚠️ For full functionality, run as Administrator (Windows) or sudo (Linux)
+2025-10-29 10:30:11,311 - INFO - ✅ Npcap detected
+2025-10-29 10:30:11,312 - INFO - Available interfaces: ['\\Device\\NPF_{57FBB57A-D862-486C-9A50-334CE4F0D575}', '\\Device\\NPF_{55AD7806-AE51-47CA-8013-B76F8518111C}', '\\Device\\NPF_{9B2F22A0-C8E5-479F-8AE9-FA3251412798}', '\\Device\\NPF_{7E5F1C8A-4C9F-4D19-9F4E-28615920595A}', '\\Device\\NPF_{487077D1-5096-44C8-BA54-610D885E0E63}', '\\Device\\NPF_{D8676F0C-7705-43EB-9A18-B730C650EA6D}', '\\Device\\NPF_{C4C19317-F2E5-4BEF-91E4-1E71C937E55E}', '\\Device\\NPF_Loopback']
+2025-10-29 10:30:12,081 - INFO -  Loading AI models...
+2025-10-29 10:30:12,492 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-10-29 10:30:12,519 - INFO -  Trojan model loaded: trojan_lstm_model.h5
+2025-10-29 10:30:12,609 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-10-29 10:30:12,620 - INFO -  APT model loaded: apt_lstm_model.h5
+2025-10-29 10:30:12,627 - INFO -  Scaler loaded: scaler_apt.pkl
+2025-10-29 10:30:12,633 - INFO -  All models loaded successfully - Ready to monitor!
+2025-10-30 14:09:31,166 - WARNING - ⚠️ NOT running as Administrator - some mitigation features may be limited
+2025-10-30 14:09:31,168 - WARNING - ⚠️ For full functionality, run as Administrator (Windows) or sudo (Linux)
+2025-10-30 14:09:31,195 - INFO - ✅ Npcap detected
+2025-10-30 14:09:31,196 - INFO - Available interfaces: ['\\Device\\NPF_{57FBB57A-D862-486C-9A50-334CE4F0D575}', '\\Device\\NPF_{55AD7806-AE51-47CA-8013-B76F8518111C}', '\\Device\\NPF_{9B2F22A0-C8E5-479F-8AE9-FA3251412798}', '\\Device\\NPF_{7E5F1C8A-4C9F-4D19-9F4E-28615920595A}', '\\Device\\NPF_{487077D1-5096-44C8-BA54-610D885E0E63}', '\\Device\\NPF_{D8676F0C-7705-43EB-9A18-B730C650EA6D}', '\\Device\\NPF_{C4C19317-F2E5-4BEF-91E4-1E71C937E55E}', '\\Device\\NPF_Loopback']
+2025-10-30 14:09:32,562 - INFO -  Loading AI models...
+2025-10-30 14:09:32,985 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-10-30 14:09:33,007 - INFO -  Trojan model loaded: trojan_lstm_model.h5
+2025-10-30 14:09:33,103 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-10-30 14:09:33,110 - INFO -  APT model loaded: apt_lstm_model.h5
+2025-10-30 14:09:33,127 - INFO -  Scaler loaded: scaler_apt.pkl
+2025-10-30 14:09:33,132 - INFO -  All models loaded successfully - Ready to monitor!
+2025-10-30 14:10:02,771 - WARNING - ⚠️ NOT running as Administrator - some mitigation features may be limited
+2025-10-30 14:10:02,771 - WARNING - ⚠️ For full functionality, run as Administrator (Windows) or sudo (Linux)
+2025-10-30 14:10:02,795 - INFO - ✅ Npcap detected
+2025-10-30 14:10:02,796 - INFO - Available interfaces: ['\\Device\\NPF_{57FBB57A-D862-486C-9A50-334CE4F0D575}', '\\Device\\NPF_{55AD7806-AE51-47CA-8013-B76F8518111C}', '\\Device\\NPF_{9B2F22A0-C8E5-479F-8AE9-FA3251412798}', '\\Device\\NPF_{7E5F1C8A-4C9F-4D19-9F4E-28615920595A}', '\\Device\\NPF_{487077D1-5096-44C8-BA54-610D885E0E63}', '\\Device\\NPF_{D8676F0C-7705-43EB-9A18-B730C650EA6D}', '\\Device\\NPF_{C4C19317-F2E5-4BEF-91E4-1E71C937E55E}', '\\Device\\NPF_Loopback']
+2025-10-30 14:10:03,470 - INFO -  Loading AI models...
+2025-10-30 14:10:03,675 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-10-30 14:10:03,694 - INFO -  Trojan model loaded: trojan_lstm_model.h5
+2025-10-30 14:10:03,773 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-10-30 14:10:03,781 - INFO -  APT model loaded: apt_lstm_model.h5
+2025-10-30 14:10:03,785 - INFO -  Scaler loaded: scaler_apt.pkl
+2025-10-30 14:10:03,792 - INFO -  All models loaded successfully - Ready to monitor!
+2025-10-30 14:11:02,623 - INFO -  Npcap detected - using Layer 2 sniffing
+2025-10-30 14:11:02,639 - INFO -  Selected interface: Local Area Connection* 1 (IP: fe80::b6e2:7888:8c40:d5cc)
+2025-10-30 14:11:02,678 - INFO -  Started monitoring on 'Local Area Connection* 1' (Layer 2)
+2025-10-30 14:11:02,680 - INFO -  Mitigation Mode: AUTO-MITIGATION ON 
+2025-10-30 14:11:02,701 - INFO -  Waiting for network traffic...
+2025-10-30 14:11:12,088 - INFO -  Stopped network monitoring
+2025-10-30 14:11:12,089 - INFO - ================================================================================
+2025-10-30 14:11:12,091 - INFO -  FINAL STATISTICS
+2025-10-30 14:11:12,092 - INFO -    Total Packets Captured: 0
+2025-10-30 14:11:12,093 - INFO -    Total Flows Analyzed: 0
+2025-10-30 14:11:12,094 - INFO -    Trojan Detections: 0
+2025-10-30 14:11:12,095 - INFO -    APT Detections: 0
+2025-10-30 14:11:12,096 - INFO -    Threats Mitigated: 0
+2025-10-30 14:11:12,099 - INFO -    IPs Blocked: 0
+2025-10-30 14:11:12,099 - INFO -    Processes Killed: 0
+2025-10-30 14:11:12,103 - INFO -    Quarantine Files: 0
+2025-10-30 14:11:12,105 - INFO - ================================================================================
+2025-10-30 14:11:15,371 - INFO -  Reloading Trojan model from: trojan_lstm_model.h5
+2025-10-30 14:11:15,455 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-10-30 14:11:15,460 - INFO -  Trojan model reloaded successfully
+2025-10-30 14:11:18,506 - INFO -  Reloading APT model from: apt_lstm_model.h5
+2025-10-30 14:11:18,555 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-10-30 14:11:18,559 - INFO -  APT model reloaded successfully
+2025-10-30 14:11:19,874 - INFO -  Reloading Scaler from: scaler_apt.pkl
+2025-10-30 14:11:19,876 - INFO -  Scaler reloaded successfully
+2025-10-30 18:14:41,456 - WARNING - ⚠️ NOT running as Administrator - some mitigation features may be limited
+2025-10-30 18:14:41,458 - WARNING - ⚠️ For full functionality, run as Administrator (Windows) or sudo (Linux)
+2025-10-30 18:14:41,473 - INFO - ✅ Npcap detected
+2025-10-30 18:14:41,474 - INFO - Available interfaces: ['\\Device\\NPF_{7E5F1C8A-4C9F-4D19-9F4E-28615920595A}', '\\Device\\NPF_{487077D1-5096-44C8-BA54-610D885E0E63}', '\\Device\\NPF_{D8676F0C-7705-43EB-9A18-B730C650EA6D}', '\\Device\\NPF_{C4C19317-F2E5-4BEF-91E4-1E71C937E55E}', '\\Device\\NPF_Loopback']
+2025-10-30 18:14:42,755 - INFO -  Loading AI models...
+2025-10-30 18:14:43,128 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-10-30 18:14:43,147 - INFO -  Trojan model loaded: trojan_lstm_model.h5
+2025-10-30 18:14:43,221 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-10-30 18:14:43,230 - INFO -  APT model loaded: apt_lstm_model.h5
+2025-10-30 18:14:43,247 - INFO -  Scaler loaded: scaler_apt.pkl
+2025-10-30 18:14:43,252 - INFO -  All models loaded successfully - Ready to monitor!
+2025-10-30 18:15:53,611 - WARNING - ⚠️ NOT running as Administrator - some mitigation features may be limited
+2025-10-30 18:15:53,612 - WARNING - ⚠️ For full functionality, run as Administrator (Windows) or sudo (Linux)
+2025-10-30 18:15:53,626 - INFO - ✅ Npcap detected
+2025-10-30 18:15:53,626 - INFO - Available interfaces: ['\\Device\\NPF_{7E5F1C8A-4C9F-4D19-9F4E-28615920595A}', '\\Device\\NPF_{487077D1-5096-44C8-BA54-610D885E0E63}', '\\Device\\NPF_{D8676F0C-7705-43EB-9A18-B730C650EA6D}', '\\Device\\NPF_{C4C19317-F2E5-4BEF-91E4-1E71C937E55E}', '\\Device\\NPF_Loopback']
+2025-10-30 18:15:54,248 - INFO -  Loading AI models...
+2025-10-30 18:15:54,456 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-10-30 18:15:54,474 - INFO -  Trojan model loaded: trojan_lstm_model.h5
+2025-10-30 18:15:54,538 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-10-30 18:15:54,547 - INFO -  APT model loaded: apt_lstm_model.h5
+2025-10-30 18:15:54,550 - INFO -  Scaler loaded: scaler_apt.pkl
+2025-10-30 18:15:54,556 - INFO -  All models loaded successfully - Ready to monitor!
+2025-10-30 18:34:17,732 - INFO - ✅ Running with Administrator privileges
+2025-10-30 18:34:17,753 - INFO - ✅ Npcap detected
+2025-10-30 18:34:17,754 - INFO - Available interfaces: ['\\Device\\NPF_{7E5F1C8A-4C9F-4D19-9F4E-28615920595A}', '\\Device\\NPF_{487077D1-5096-44C8-BA54-610D885E0E63}', '\\Device\\NPF_{D8676F0C-7705-43EB-9A18-B730C650EA6D}', '\\Device\\NPF_{C4C19317-F2E5-4BEF-91E4-1E71C937E55E}', '\\Device\\NPF_Loopback']
+2025-10-30 18:34:18,535 - INFO -  Loading AI models...
+2025-10-30 18:34:18,694 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-10-30 18:34:18,710 - INFO -  Trojan model loaded: trojan_lstm_model.h5
+2025-10-30 18:34:18,765 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-10-30 18:34:18,773 - INFO -  APT model loaded: apt_lstm_model.h5
+2025-10-30 18:34:18,777 - INFO -  Scaler loaded: scaler_apt.pkl
+2025-10-30 18:34:18,782 - INFO -  All models loaded successfully - Ready to monitor!
+2025-10-30 20:28:30,206 - INFO - ✅ Running with Administrator privileges
+2025-10-30 20:28:30,266 - INFO - ✅ Npcap detected
+2025-10-30 20:28:30,266 - INFO - Available interfaces: ['\\Device\\NPF_{7E5F1C8A-4C9F-4D19-9F4E-28615920595A}', '\\Device\\NPF_{487077D1-5096-44C8-BA54-610D885E0E63}', '\\Device\\NPF_{D8676F0C-7705-43EB-9A18-B730C650EA6D}', '\\Device\\NPF_{C4C19317-F2E5-4BEF-91E4-1E71C937E55E}', '\\Device\\NPF_Loopback']
+2025-10-30 20:28:32,229 - INFO -  Loading AI models...
+2025-10-30 20:28:32,276 - INFO -  Trojan model not found: trojan_lstm_model.h5
+2025-10-30 20:28:32,281 - INFO -  APT model not found: apt_lstm_model.h5
+2025-10-30 20:28:32,296 - INFO -  Scaler loaded: scaler_apt.pkl
+2025-10-30 20:28:32,316 - INFO -  Some models missing - Please load models before starting
+2025-10-30 20:34:54,472 - INFO -  Reloading Trojan model from: trojan_blstm_model.h5
+2025-10-30 20:34:54,953 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-10-30 20:34:54,973 - INFO -  Trojan model reloaded successfully
+2025-10-30 20:34:56,239 - INFO -  Reloading APT model from: apt_blstm_model.h5
+2025-10-30 20:34:56,507 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-10-30 20:34:56,525 - INFO -  APT model reloaded successfully
+2025-10-30 20:34:57,848 - INFO -  Reloading Scaler from: scaler_apt.pkl
+2025-10-30 20:34:57,851 - INFO -  Scaler reloaded successfully
+2025-10-30 20:34:59,351 - INFO -  Npcap detected - using Layer 2 sniffing
+2025-10-30 20:34:59,371 - INFO -  Selected interface: Local Area Connection* 1 (IP: fe80::b6e2:7888:8c40:d5cc)
+2025-10-30 20:34:59,421 - INFO -  Started monitoring on 'Local Area Connection* 1' (Layer 2)
+2025-10-30 20:34:59,425 - INFO -  Mitigation Mode: AUTO-MITIGATION ON 
+2025-10-30 20:34:59,452 - INFO -  Waiting for network traffic...
+2025-10-30 20:38:32,343 - INFO - ================================================================================
+2025-10-30 20:38:32,348 - INFO -  5-MINUTE STATISTICS REPORT
+2025-10-30 20:38:32,352 - INFO -    Total Packets Captured: 0
+2025-10-30 20:38:32,353 - INFO -    Total Flows Analyzed: 0
+2025-10-30 20:38:32,355 - INFO -    Active Flows (ongoing): 0
+2025-10-30 20:38:32,357 - INFO -    Trojan Detections: 0
+2025-10-30 20:38:32,359 - INFO -    APT Detections: 0
+2025-10-30 20:38:32,361 - INFO -    Threats Mitigated: 0
+2025-10-30 20:38:32,362 - INFO -    Detection Rate: 0.00%
+2025-10-30 20:38:32,363 - INFO -    Blocked IPs: 0
+2025-10-30 20:38:32,365 - INFO - ================================================================================
+2025-10-30 20:43:32,377 - INFO - ================================================================================
+2025-10-30 20:43:32,380 - INFO -  5-MINUTE STATISTICS REPORT
+2025-10-30 20:43:32,382 - INFO -    Total Packets Captured: 0
+2025-10-30 20:43:32,384 - INFO -    Total Flows Analyzed: 0
+2025-10-30 20:43:32,386 - INFO -    Active Flows (ongoing): 0
+2025-10-30 20:43:32,388 - INFO -    Trojan Detections: 0
+2025-10-30 20:43:32,390 - INFO -    APT Detections: 0
+2025-10-30 20:43:32,391 - INFO -    Threats Mitigated: 0
+2025-10-30 20:43:32,393 - INFO -    Detection Rate: 0.00%
+2025-10-30 20:43:32,394 - INFO -    Blocked IPs: 0
+2025-10-30 20:43:32,395 - INFO - ================================================================================
+2025-10-30 20:48:32,410 - INFO - ================================================================================
+2025-10-30 20:48:32,418 - INFO -  5-MINUTE STATISTICS REPORT
+2025-10-30 20:48:32,422 - INFO -    Total Packets Captured: 0
+2025-10-30 20:48:32,424 - INFO -    Total Flows Analyzed: 0
+2025-10-30 20:48:32,428 - INFO -    Active Flows (ongoing): 0
+2025-10-30 20:48:32,432 - INFO -    Trojan Detections: 0
+2025-10-30 20:48:32,435 - INFO -    APT Detections: 0
+2025-10-30 20:48:32,439 - INFO -    Threats Mitigated: 0
+2025-10-30 20:48:32,441 - INFO -    Detection Rate: 0.00%
+2025-10-30 20:48:32,443 - INFO -    Blocked IPs: 0
+2025-10-30 20:48:32,446 - INFO - ================================================================================
+2025-10-30 20:53:32,452 - INFO - ================================================================================
+2025-10-30 20:53:32,456 - INFO -  5-MINUTE STATISTICS REPORT
+2025-10-30 20:53:32,459 - INFO -    Total Packets Captured: 0
+2025-10-30 20:53:32,461 - INFO -    Total Flows Analyzed: 0
+2025-10-30 20:53:32,463 - INFO -    Active Flows (ongoing): 0
+2025-10-30 20:53:32,464 - INFO -    Trojan Detections: 0
+2025-10-30 20:53:32,467 - INFO -    APT Detections: 0
+2025-10-30 20:53:32,469 - INFO -    Threats Mitigated: 0
+2025-10-30 20:53:32,470 - INFO -    Detection Rate: 0.00%
+2025-10-30 20:53:32,472 - INFO -    Blocked IPs: 0
+2025-10-30 20:53:32,474 - INFO - ================================================================================
+2025-10-30 20:54:14,235 - INFO -  Stopped network monitoring
+2025-10-30 20:54:14,240 - INFO - ================================================================================
+2025-10-30 20:54:14,246 - INFO -  FINAL STATISTICS
+2025-10-30 20:54:14,248 - INFO -    Total Packets Captured: 0
+2025-10-30 20:54:14,250 - INFO -    Total Flows Analyzed: 0
+2025-10-30 20:54:14,252 - INFO -    Trojan Detections: 0
+2025-10-30 20:54:14,254 - INFO -    APT Detections: 0
+2025-10-30 20:54:14,260 - INFO -    Threats Mitigated: 0
+2025-10-30 20:54:14,263 - INFO -    IPs Blocked: 0
+2025-10-30 20:54:14,265 - INFO -    Processes Killed: 0
+2025-10-30 20:54:14,267 - INFO -    Quarantine Files: 0
+2025-10-30 20:54:14,270 - INFO - ================================================================================
+2025-10-30 20:54:17,399 - INFO -  Opened quarantine folder: quarantine
