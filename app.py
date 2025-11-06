@@ -1009,8 +1009,8 @@ Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"""
                 
                 if features:
                     self.log_message(f"   Duration: {features['Flow Duration']:.2f}ms, "
-                                   f"Fwd: {features['Total Fwd Packets']}, "
-                                   f"Bwd: {features['Total Backward Packets']}")
+                                   f"Fwd: {features['Total Fwd Packet']}, "
+                                   f"Bwd: {features['Total Bwd packets']}")
                     
                     # Check if models are loaded
                     if not self.trojan_model or not self.apt_model or not self.scaler:
