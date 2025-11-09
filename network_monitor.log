@@ -450,3 +450,23 @@ AttributeError: 'NetworkMonitorApp' object has no attribute 'try_auto_load_model
 2025-11-06 19:17:29,229 - INFO -  APT model loaded: apt_lstm_model.h5
 2025-11-06 19:17:29,248 - INFO -  Scaler not found - please use Browse button
 2025-11-06 19:17:29,263 - INFO -  Partial load: 2/3 models loaded
+2025-11-06 19:25:11,560 - INFO -  Monitoring cancelled - please load AI models first
+2025-11-09 21:14:02,695 - INFO - ✅ Running with Administrator privileges
+2025-11-09 21:14:02,731 - INFO - ✅ Npcap detected
+2025-11-09 21:14:02,731 - INFO - Available interfaces: ['\\Device\\NPF_{7E5F1C8A-4C9F-4D19-9F4E-28615920595A}', '\\Device\\NPF_{487077D1-5096-44C8-BA54-610D885E0E63}', '\\Device\\NPF_{D8676F0C-7705-43EB-9A18-B730C650EA6D}', '\\Device\\NPF_{C4C19317-F2E5-4BEF-91E4-1E71C937E55E}', '\\Device\\NPF_Loopback']
+2025-11-09 21:14:04,089 - INFO - ================================================================================
+2025-11-09 21:14:04,112 - INFO -  APT & TROJAN DETECTION SYSTEM - ADMINISTRATOR MODE
+2025-11-09 21:14:04,117 - INFO - ================================================================================
+2025-11-09 21:14:04,132 - INFO -  STEP 1: Load AI models using Browse buttons above
+2025-11-09 21:14:04,141 - INFO -  STEP 2: Click 'START MONITORING' to begin detection
+2025-11-09 21:14:04,148 - INFO -  STEP 3: Threats will be automatically detected and mitigated
+2025-11-09 21:14:04,157 - INFO - ================================================================================
+2025-11-09 21:14:04,159 - INFO - 
+2025-11-09 21:14:04,177 - INFO -  Found model files, attempting auto-load...
+2025-11-09 21:14:04,186 - INFO -  Loading all AI models...
+2025-11-09 21:14:04,492 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-11-09 21:14:04,506 - INFO -  Trojan model loaded: trojan_lstm_model.h5
+2025-11-09 21:14:04,581 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-11-09 21:14:04,588 - INFO -  APT model loaded: apt_lstm_model.h5
+2025-11-09 21:14:04,609 - INFO -  Scaler not found - please use Browse button
+2025-11-09 21:14:04,626 - INFO -  Partial load: 2/3 models loaded

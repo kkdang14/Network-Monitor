@@ -349,8 +349,8 @@ class NetworkFlowAnalyzer:
             logging.error(f"Error generating flow key: {str(e)}")
             return None
     
-    def extract_features(self, flow_packets):
-        """Extract exactly 77 CICFlowMeter features matching the trained model."""
+    def extract_features_trojan(self, flow_packets):
+        """Extract 77 features for TROJAN detection (set 1)."""
         if not flow_packets:
             return None
             
@@ -362,6 +362,7 @@ class NetworkFlowAnalyzer:
             logging.error("Invalid packet data in flow")
             return None
         
+        # [Giữ nguyên phần tính toán statistics như code cũ]
         fwd_packets, bwd_packets = 0, 0
         fwd_bytes, bwd_bytes = 0, 0
         fwd_lengths, bwd_lengths = [], []
@@ -379,14 +380,13 @@ class NetworkFlowAnalyzer:
                 pkt_len = len(packet)
                 packet_lengths.append(pkt_len)
                 
-                iat = (pkt_time - prev_time) * 1000000  # microseconds
+                iat = (pkt_time - prev_time) * 1000000
                 iat_intervals.append(iat)
                 prev_time = pkt_time
                 
                 src_port = packet[TCP].sport if TCP in packet else packet[UDP].sport if UDP in packet else 0
                 dst_port = packet[TCP].dport if TCP in packet else packet[UDP].dport if UDP in packet else 0
                 
-                # Determine forward/backward based on port numbers
                 if src_port > 1024 and dst_port <= 1024:
                     fwd_packets += 1
                     fwd_bytes += pkt_len
@@ -400,7 +400,6 @@ class NetworkFlowAnalyzer:
                     if len(bwd_iat) > 0 or bwd_packets > 1:
                         bwd_iat.append(iat)
                 
-                # Extract TCP flags
                 if TCP in packet:
                     flags['FIN'] += 1 if packet[TCP].flags & 0x01 else 0
                     flags['SYN'] += 1 if packet[TCP].flags & 0x02 else 0
@@ -413,127 +412,232 @@ class NetworkFlowAnalyzer:
             except Exception as e:
                 continue
         
-        # Calculate statistics
         total_packets = fwd_packets + bwd_packets
         total_bytes = fwd_bytes + bwd_bytes
         flow_duration_sec = flow_duration / 1000000 if flow_duration > 0 else 0.000001
         
-        # Create features dictionary with EXACT names from your model (77 features)
+        # TROJAN FEATURES (Set 1) - CHÚ Ý TÊN KHÁC
         features = {
-            # 1. Protocol
             'Protocol': 6 if TCP in flow_packets[0] else 17,
-            
-            # 2. Flow Duration
             'Flow Duration': flow_duration,
-            
-            # 3-4. Packet counts
-            'Total Fwd Packet': fwd_packets,
-            'Total Bwd packets': bwd_packets,
-            
-            # 5-6. Byte counts
-            'Total Length of Fwd Packet': fwd_bytes,
-            'Total Length of Bwd Packet': bwd_bytes,
-            
-            # 7-10. Forward packet length stats
+            'Total Fwd Packets': fwd_packets,  # Khác: "Packets" (có s)
+            'Total Backward Packets': bwd_packets,  # Khác: "Backward Packets"
+            'Total Length of Fwd Packets': fwd_bytes,  # Khác: "Packets" (có s)
+            'Total Length of Bwd Packets': bwd_bytes,  # Khác: "Packets" (có s)
             'Fwd Packet Length Max': max(fwd_lengths) if fwd_lengths else 0,
             'Fwd Packet Length Min': min(fwd_lengths) if fwd_lengths else 0,
             'Fwd Packet Length Mean': np.mean(fwd_lengths) if fwd_lengths else 0,
             'Fwd Packet Length Std': np.std(fwd_lengths) if fwd_lengths else 0,
-            
-            # 11-14. Backward packet length stats
             'Bwd Packet Length Max': max(bwd_lengths) if bwd_lengths else 0,
             'Bwd Packet Length Min': min(bwd_lengths) if bwd_lengths else 0,
             'Bwd Packet Length Mean': np.mean(bwd_lengths) if bwd_lengths else 0,
             'Bwd Packet Length Std': np.std(bwd_lengths) if bwd_lengths else 0,
-            
-            # 15-16. Flow rates
             'Flow Bytes/s': total_bytes / flow_duration_sec,
             'Flow Packets/s': total_packets / flow_duration_sec,
-            
-            # 17-20. Flow IAT stats
             'Flow IAT Mean': np.mean(iat_intervals) if iat_intervals else 0,
             'Flow IAT Std': np.std(iat_intervals) if iat_intervals else 0,
             'Flow IAT Max': max(iat_intervals) if iat_intervals else 0,
             'Flow IAT Min': min(iat_intervals) if iat_intervals else 0,
-            
-            # 21-25. Forward IAT stats
             'Fwd IAT Total': sum(fwd_iat) if fwd_iat else 0,
             'Fwd IAT Mean': np.mean(fwd_iat) if fwd_iat else 0,
             'Fwd IAT Std': np.std(fwd_iat) if fwd_iat else 0,
             'Fwd IAT Max': max(fwd_iat) if fwd_iat else 0,
             'Fwd IAT Min': min(fwd_iat) if fwd_iat else 0,
-            
-            # 26-30. Backward IAT stats
             'Bwd IAT Total': sum(bwd_iat) if bwd_iat else 0,
             'Bwd IAT Mean': np.mean(bwd_iat) if bwd_iat else 0,
             'Bwd IAT Std': np.std(bwd_iat) if bwd_iat else 0,
             'Bwd IAT Max': max(bwd_iat) if bwd_iat else 0,
             'Bwd IAT Min': min(bwd_iat) if bwd_iat else 0,
-            
-            # 31-34. PSH and URG flags
             'Fwd PSH Flags': flags['PSH'],
-            'Bwd PSH Flags': 0,  # Typically 0 for backward
+            'Bwd PSH Flags': 0,
             'Fwd URG Flags': flags['URG'],
-            'Bwd URG Flags': 0,  # Typically 0 for backward
-            
-            # 35-36. Header lengths (20 bytes per TCP packet, 8 per UDP)
+            'Bwd URG Flags': 0,
             'Fwd Header Length': (20 if TCP in flow_packets[0] else 8) * fwd_packets,
             'Bwd Header Length': (20 if TCP in flow_packets[0] else 8) * bwd_packets,
-            
-            # 37-38. Packet rates per direction
             'Fwd Packets/s': fwd_packets / flow_duration_sec,
             'Bwd Packets/s': bwd_packets / flow_duration_sec,
-            
-            # 39-43. Packet length statistics (all packets)
-            'Packet Length Min': min(packet_lengths) if packet_lengths else 0,
-            'Packet Length Max': max(packet_lengths) if packet_lengths else 0,
+            'Min Packet Length': min(packet_lengths) if packet_lengths else 0,
+            'Max Packet Length': max(packet_lengths) if packet_lengths else 0,
             'Packet Length Mean': np.mean(packet_lengths) if packet_lengths else 0,
             'Packet Length Std': np.std(packet_lengths) if packet_lengths else 0,
             'Packet Length Variance': np.var(packet_lengths) if packet_lengths else 0,
-            
-            # 44-51. TCP flags
             'FIN Flag Count': flags['FIN'],
             'SYN Flag Count': flags['SYN'],
             'RST Flag Count': flags['RST'],
             'PSH Flag Count': flags['PSH'],
             'ACK Flag Count': flags['ACK'],
             'URG Flag Count': flags['URG'],
-            'CWR Flag Count': flags['CWR'],
+            'CWE Flag Count': flags['CWR'],  # Khác: "CWE" thay vì "CWR"
             'ECE Flag Count': flags['ECE'],
-            
-            # 52. Down/Up ratio
             'Down/Up Ratio': bwd_bytes / fwd_bytes if fwd_bytes > 0 else 0,
-            
-            # 53. Average packet size
             'Average Packet Size': total_bytes / total_packets if total_packets > 0 else 0,
+            'Avg Fwd Segment Size': np.mean(fwd_lengths) if fwd_lengths else 0,
+            'Avg Bwd Segment Size': np.mean(bwd_lengths) if bwd_lengths else 0,
+            'Fwd Header Length.1': (20 if TCP in flow_packets[0] else 8) * fwd_packets,  # Khác: thêm ".1"
+            'Fwd Avg Bytes/Bulk': 0,
+            'Fwd Avg Packets/Bulk': 0,
+            'Fwd Avg Bulk Rate': 0,
+            'Bwd Avg Bytes/Bulk': 0,
+            'Bwd Avg Packets/Bulk': 0,
+            'Bwd Avg Bulk Rate': 0,
+            'Subflow Fwd Packets': fwd_packets,
+            'Subflow Fwd Bytes': fwd_bytes,
+            'Subflow Bwd Packets': bwd_packets,
+            'Subflow Bwd Bytes': bwd_bytes,
+            'Init_Win_bytes_forward': 65535,  # Khác: dấu gạch dưới
+            'Init_Win_bytes_backward': 65535,  # Khác: dấu gạch dưới
+            'act_data_pkt_fwd': fwd_packets,  # Khác: chữ thường và gạch dưới
+            'min_seg_size_forward': 20,  # Khác: chữ thường và gạch dưới
+            'Active Mean': 0,
+            'Active Std': 0,
+            'Active Max': 0,
+            'Active Min': 0,
+            'Idle Mean': 0,
+            'Idle Std': 0,
+            'Idle Max': 0,
+            'Idle Min': 0
+        }
+        
+        return features
+
+    def extract_features_apt(self, flow_packets):
+        """Extract 77 features for APT detection (set 2)."""
+        if not flow_packets:
+            return None
             
-            # 54-55. Segment size averages
-            'Fwd Segment Size Avg': np.mean(fwd_lengths) if fwd_lengths else 0,
+        try:
+            start_time = min(p.time for p in flow_packets)
+            end_time = max(p.time for p in flow_packets)
+            flow_duration = (end_time - start_time) * 1000000
+        except AttributeError:
+            logging.error("Invalid packet data in flow")
+            return None
+        
+        # [Giữ nguyên phần tính toán statistics]
+        fwd_packets, bwd_packets = 0, 0
+        fwd_bytes, bwd_bytes = 0, 0
+        fwd_lengths, bwd_lengths = [], []
+        iat_intervals = []
+        fwd_iat, bwd_iat = [], []
+        flags = defaultdict(int)
+        packet_lengths = []
+        
+        sorted_packets = sorted(flow_packets, key=lambda p: p.time)
+        prev_time = start_time
+        
+        for packet in sorted_packets:
+            try:
+                pkt_time = packet.time
+                pkt_len = len(packet)
+                packet_lengths.append(pkt_len)
+                
+                iat = (pkt_time - prev_time) * 1000000
+                iat_intervals.append(iat)
+                prev_time = pkt_time
+                
+                src_port = packet[TCP].sport if TCP in packet else packet[UDP].sport if UDP in packet else 0
+                dst_port = packet[TCP].dport if TCP in packet else packet[UDP].dport if UDP in packet else 0
+                
+                if src_port > 1024 and dst_port <= 1024:
+                    fwd_packets += 1
+                    fwd_bytes += pkt_len
+                    fwd_lengths.append(pkt_len)
+                    if len(fwd_iat) > 0 or fwd_packets > 1:
+                        fwd_iat.append(iat)
+                else:
+                    bwd_packets += 1
+                    bwd_bytes += pkt_len
+                    bwd_lengths.append(pkt_len)
+                    if len(bwd_iat) > 0 or bwd_packets > 1:
+                        bwd_iat.append(iat)
+                
+                if TCP in packet:
+                    flags['FIN'] += 1 if packet[TCP].flags & 0x01 else 0
+                    flags['SYN'] += 1 if packet[TCP].flags & 0x02 else 0
+                    flags['RST'] += 1 if packet[TCP].flags & 0x04 else 0
+                    flags['PSH'] += 1 if packet[TCP].flags & 0x08 else 0
+                    flags['ACK'] += 1 if packet[TCP].flags & 0x10 else 0
+                    flags['URG'] += 1 if packet[TCP].flags & 0x20 else 0
+                    flags['CWR'] += 1 if packet[TCP].flags & 0x80 else 0
+                    flags['ECE'] += 1 if packet[TCP].flags & 0x40 else 0
+            except Exception as e:
+                continue
+        
+        total_packets = fwd_packets + bwd_packets
+        total_bytes = fwd_bytes + bwd_bytes
+        flow_duration_sec = flow_duration / 1000000 if flow_duration > 0 else 0.000001
+        
+        # APT FEATURES (Set 2)
+        features = {
+            'Protocol': 6 if TCP in flow_packets[0] else 17,
+            'Flow Duration': flow_duration,
+            'Total Fwd Packet': fwd_packets,  # Không có "s"
+            'Total Bwd packets': bwd_packets,  # Chữ thường "packets"
+            'Total Length of Fwd Packet': fwd_bytes,  # Không có "s"
+            'Total Length of Bwd Packet': bwd_bytes,  # Không có "s"
+            'Fwd Packet Length Max': max(fwd_lengths) if fwd_lengths else 0,
+            'Fwd Packet Length Min': min(fwd_lengths) if fwd_lengths else 0,
+            'Fwd Packet Length Mean': np.mean(fwd_lengths) if fwd_lengths else 0,
+            'Fwd Packet Length Std': np.std(fwd_lengths) if fwd_lengths else 0,
+            'Bwd Packet Length Max': max(bwd_lengths) if bwd_lengths else 0,
+            'Bwd Packet Length Min': min(bwd_lengths) if bwd_lengths else 0,
+            'Bwd Packet Length Mean': np.mean(bwd_lengths) if bwd_lengths else 0,
+            'Bwd Packet Length Std': np.std(bwd_lengths) if bwd_lengths else 0,
+            'Flow Bytes/s': total_bytes / flow_duration_sec,
+            'Flow Packets/s': total_packets / flow_duration_sec,
+            'Flow IAT Mean': np.mean(iat_intervals) if iat_intervals else 0,
+            'Flow IAT Std': np.std(iat_intervals) if iat_intervals else 0,
+            'Flow IAT Max': max(iat_intervals) if iat_intervals else 0,
+            'Flow IAT Min': min(iat_intervals) if iat_intervals else 0,
+            'Fwd IAT Total': sum(fwd_iat) if fwd_iat else 0,
+            'Fwd IAT Mean': np.mean(fwd_iat) if fwd_iat else 0,
+            'Fwd IAT Std': np.std(fwd_iat) if fwd_iat else 0,
+            'Fwd IAT Max': max(fwd_iat) if fwd_iat else 0,
+            'Fwd IAT Min': min(fwd_iat) if fwd_iat else 0,
+            'Bwd IAT Total': sum(bwd_iat) if bwd_iat else 0,
+            'Bwd IAT Mean': np.mean(bwd_iat) if bwd_iat else 0,
+            'Bwd IAT Std': np.std(bwd_iat) if bwd_iat else 0,
+            'Bwd IAT Max': max(bwd_iat) if bwd_iat else 0,
+            'Bwd IAT Min': min(bwd_iat) if bwd_iat else 0,
+            'Fwd PSH Flags': flags['PSH'],
+            'Bwd PSH Flags': 0,
+            'Fwd URG Flags': flags['URG'],
+            'Bwd URG Flags': 0,
+            'Fwd Header Length': (20 if TCP in flow_packets[0] else 8) * fwd_packets,
+            'Bwd Header Length': (20 if TCP in flow_packets[0] else 8) * bwd_packets,
+            'Fwd Packets/s': fwd_packets / flow_duration_sec,
+            'Bwd Packets/s': bwd_packets / flow_duration_sec,
+            'Packet Length Min': min(packet_lengths) if packet_lengths else 0,
+            'Packet Length Max': max(packet_lengths) if packet_lengths else 0,
+            'Packet Length Mean': np.mean(packet_lengths) if packet_lengths else 0,
+            'Packet Length Std': np.std(packet_lengths) if packet_lengths else 0,
+            'Packet Length Variance': np.var(packet_lengths) if packet_lengths else 0,
+            'FIN Flag Count': flags['FIN'],
+            'SYN Flag Count': flags['SYN'],
+            'RST Flag Count': flags['RST'],
+            'PSH Flag Count': flags['PSH'],
+            'ACK Flag Count': flags['ACK'],
+            'URG Flag Count': flags['URG'],
+            'CWR Flag Count': flags['CWR'],  # "CWR" đúng
+            'ECE Flag Count': flags['ECE'],
+            'Down/Up Ratio': bwd_bytes / fwd_bytes if fwd_bytes > 0 else 0,
+            'Average Packet Size': total_bytes / total_packets if total_packets > 0 else 0,
+            'Fwd Segment Size Avg': np.mean(fwd_lengths) if fwd_lengths else 0,  # "Segment Size Avg"
             'Bwd Segment Size Avg': np.mean(bwd_lengths) if bwd_lengths else 0,
-            
-            # 56-61. Bulk transfer features (typically 0 for most flows)
-            'Fwd Bytes/Bulk Avg': 0,
+            'Fwd Bytes/Bulk Avg': 0,  # "Bytes/Bulk Avg"
             'Fwd Packet/Bulk Avg': 0,
             'Fwd Bulk Rate Avg': 0,
             'Bwd Bytes/Bulk Avg': 0,
             'Bwd Packet/Bulk Avg': 0,
             'Bwd Bulk Rate Avg': 0,
-            
-            # 62-65. Subflow features
             'Subflow Fwd Packets': fwd_packets,
             'Subflow Fwd Bytes': fwd_bytes,
             'Subflow Bwd Packets': bwd_packets,
             'Subflow Bwd Bytes': bwd_bytes,
-            
-            # 66-67. Initial window bytes
-            'FWD Init Win Bytes': 65535,  # Default TCP window size
-            'Bwd Init Win Bytes': 65535,
-            
-            # 68-69. Active data packets
-            'Fwd Act Data Pkts': fwd_packets,
-            'Fwd Seg Size Min': 20,  # Minimum TCP header size
-            
-            # 70-77. Active and Idle time statistics
+            'FWD Init Win Bytes': 65535,  # Chữ in hoa "FWD"
+            'Bwd Init Win Bytes': 65535,  # Chữ in hoa "Bwd"
+            'Fwd Act Data Pkts': fwd_packets,  # Không có gạch dưới
+            'Fwd Seg Size Min': 20,  # "Seg Size Min"
             'Active Mean': 0,
             'Active Std': 0,
             'Active Max': 0,
@@ -1005,30 +1109,43 @@ Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"""
                 
                 self.log_message(f"🔍 Analyzing flow: {flow_id} ({len(flow_packets)} packets)")
                 
-                features = self.analyzer.extract_features(flow_packets)
+                # Extract features for both models
+                features_trojan = self.analyzer.extract_features_trojan(flow_packets)
+                features_apt = self.analyzer.extract_features_apt(flow_packets)
                 
-                if features:
-                    self.log_message(f"   Duration: {features['Flow Duration']:.2f}μs, "
-                                   f"Fwd: {features['Total Fwd Packet']}, "
-                                   f"Bwd: {features['Total Bwd packets']}")
+                if features_trojan and features_apt:
+                    self.log_message(f"   Duration: {features_apt['Flow Duration']:.2f}μs, "
+                                f"Fwd: {features_apt['Total Fwd Packet']}, "
+                                f"Bwd: {features_apt['Total Bwd packets']}")
                     
                     # Check if models are loaded
                     if not self.trojan_model or not self.apt_model or not self.scaler:
                         self.log_message("⚠️ Models not loaded - skipping AI detection (flow logged only)")
                         return
                     
-                    feature_df = pd.DataFrame([features])
-                    
-                    # Verify feature count
-                    if len(feature_df.columns) != 77:
-                        self.log_message(f"⚠️ Feature mismatch: expected 77, got {len(feature_df.columns)}")
+                    # Prepare Trojan features
+                    feature_df_trojan = pd.DataFrame([features_trojan])
+                    if len(feature_df_trojan.columns) != 77:
+                        self.log_message(f"⚠️ Trojan feature mismatch: expected 77, got {len(feature_df_trojan.columns)}")
                         return
                     
-                    X_new = self.scaler.transform(feature_df)
-                    X_new = X_new.reshape((1, 1, X_new.shape[1]))
+                    X_trojan = self.scaler.transform(feature_df_trojan)
+                    X_trojan = X_trojan.reshape((1, 1, X_trojan.shape[1]))
                     
-                    trojan_prob = self.trojan_model.predict(X_new, verbose=0)[0][0]
-                    apt_prob = self.apt_model.predict(X_new, verbose=0)[0][0]
+                    # Prepare APT features
+                    feature_df_apt = pd.DataFrame([features_apt])
+                    if len(feature_df_apt.columns) != 77:
+                        self.log_message(f"⚠️ APT feature mismatch: expected 77, got {len(feature_df_apt.columns)}")
+                        return
+                    
+                    X_apt = self.scaler.transform(feature_df_apt)
+                    X_apt = X_apt.reshape((1, 1, X_apt.shape[1]))
+                    
+                    # Predict
+                    trojan_prob = self.trojan_model.predict(X_trojan, verbose=0)[0][0]
+                    apt_prob = self.apt_model.predict(X_apt, verbose=0)[0][0]
+                    
+                    # [Giữ nguyên phần còn lại]
                     
                     trojan_pred = 1 if trojan_prob > 0.5 else 0
                     apt_pred = 1 if apt_prob > 0.5 else 0
