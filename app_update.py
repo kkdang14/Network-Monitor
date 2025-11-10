@@ -1125,7 +1125,7 @@ Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"""
                     
                     # Prepare Trojan features
                     feature_df_trojan = pd.DataFrame([features_trojan])
-                    if len(feature_df_trojan.columns) != 77:
+                    if len(feature_df_trojan.columns) != 78:
                         self.log_message(f"⚠️ Trojan feature mismatch: expected 77, got {len(feature_df_trojan.columns)}")
                         return
                     
