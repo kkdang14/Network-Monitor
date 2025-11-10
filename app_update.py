@@ -662,12 +662,14 @@ class NetworkMonitorApp:
         # Model paths - DEFAULT TO EMPTY (will be set by user)
         self.trojan_model_path = tk.StringVar(value='')
         self.apt_model_path = tk.StringVar(value='')
-        self.scaler_path = tk.StringVar(value='')
-        
+        self.scaler_trojan_path = tk.StringVar(value='')
+        self.scaler_apt_path = tk.StringVar(value='')
+
         # Models - START AS NONE
         self.trojan_model = None
         self.apt_model = None
-        self.scaler = None
+        self.scaler_trojan = None
+        self.scaler_apt = None
         
         # Initialize mitigation engine
         self.mitigation_engine = ThreatMitigationEngine(self.log_message)
@@ -687,23 +689,28 @@ class NetworkMonitorApp:
         possible_paths = [
             ('trojan_lstm_model.h5', 'trojan'),
             ('apt_lstm_model.h5', 'apt'),
-            ('scaler_apt.pkl', 'scaler'),
+            ('scaler_trojan.pkl', 'scaler_trojan'),
+            ('scaler_apt.pkl', 'scaler_apt'),
             ('models/trojan_lstm_model.h5', 'trojan'),
             ('models/apt_lstm_model.h5', 'apt'),
-            ('models/scaler_apt.pkl', 'scaler'),
+            ('models/scaler_trojan.pkl', 'scaler_trojan'),
+            ('models/scaler_apt.pkl', 'scaler_apt'),
         ]
-        
+
         for path, model_type in possible_paths:
             if os.path.exists(path):
                 if model_type == 'trojan' and not self.trojan_model_path.get():
                     self.trojan_model_path.set(path)
                 elif model_type == 'apt' and not self.apt_model_path.get():
                     self.apt_model_path.set(path)
-                elif model_type == 'scaler' and not self.scaler_path.get():
-                    self.scaler_path.set(path)
-        
+                elif model_type == 'scaler_trojan' and not self.scaler_trojan_path.get():
+                    self.scaler_trojan_path.set(path)
+                elif model_type == 'scaler_apt' and not self.scaler_apt_path.get():
+                    self.scaler_apt_path.set(path)
+
         # Try to load if paths were found
-        if self.trojan_model_path.get() or self.apt_model_path.get() or self.scaler_path.get():
+        if (self.trojan_model_path.get() or self.apt_model_path.get() or 
+            self.scaler_trojan_path.get() or self.scaler_apt_path.get()):
             self.log_message("🔍 Found model files, attempting auto-load...")
             self.load_all_models()
     
@@ -735,34 +742,43 @@ class NetworkMonitorApp:
         
         models_grid = ttk.Frame(model_frame)
         models_grid.pack(fill=tk.X)
-        
+
         # Trojan Model
-        ttk.Label(models_grid, text="Trojan Model:", width=12).grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
-        trojan_entry = ttk.Entry(models_grid, textvariable=self.trojan_model_path, width=50, font=('Arial', 9))
+        ttk.Label(models_grid, text="Trojan Model:", width=15).grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
+        trojan_entry = ttk.Entry(models_grid, textvariable=self.trojan_model_path, width=45, font=('Arial', 9))
         trojan_entry.grid(row=0, column=1, padx=5, sticky=tk.EW)
         btn_frame1 = ttk.Frame(models_grid)
         btn_frame1.grid(row=0, column=2, padx=5)
         ttk.Button(btn_frame1, text="📁 Browse", command=lambda: self.browse_model('trojan'), width=10).pack(side=tk.LEFT, padx=2)
         ttk.Button(btn_frame1, text="🔄 Load", command=lambda: self.reload_model('trojan'), width=8).pack(side=tk.LEFT, padx=2)
-        
+
         # APT Model
-        ttk.Label(models_grid, text="APT Model:", width=12).grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
-        apt_entry = ttk.Entry(models_grid, textvariable=self.apt_model_path, width=50, font=('Arial', 9))
+        ttk.Label(models_grid, text="APT Model:", width=15).grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
+        apt_entry = ttk.Entry(models_grid, textvariable=self.apt_model_path, width=45, font=('Arial', 9))
         apt_entry.grid(row=1, column=1, padx=5, sticky=tk.EW)
         btn_frame2 = ttk.Frame(models_grid)
         btn_frame2.grid(row=1, column=2, padx=5)
         ttk.Button(btn_frame2, text="📁 Browse", command=lambda: self.browse_model('apt'), width=10).pack(side=tk.LEFT, padx=2)
         ttk.Button(btn_frame2, text="🔄 Load", command=lambda: self.reload_model('apt'), width=8).pack(side=tk.LEFT, padx=2)
-        
-        # Scaler
-        ttk.Label(models_grid, text="Scaler:", width=12).grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
-        scaler_entry = ttk.Entry(models_grid, textvariable=self.scaler_path, width=50, font=('Arial', 9))
-        scaler_entry.grid(row=2, column=1, padx=5, sticky=tk.EW)
+
+        # Scaler Trojan
+        ttk.Label(models_grid, text="Scaler Trojan:", width=15).grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
+        scaler_trojan_entry = ttk.Entry(models_grid, textvariable=self.scaler_trojan_path, width=45, font=('Arial', 9))
+        scaler_trojan_entry.grid(row=2, column=1, padx=5, sticky=tk.EW)
         btn_frame3 = ttk.Frame(models_grid)
         btn_frame3.grid(row=2, column=2, padx=5)
-        ttk.Button(btn_frame3, text="📁 Browse", command=lambda: self.browse_model('scaler'), width=10).pack(side=tk.LEFT, padx=2)
-        ttk.Button(btn_frame3, text="🔄 Load", command=lambda: self.reload_model('scaler'), width=8).pack(side=tk.LEFT, padx=2)
-        
+        ttk.Button(btn_frame3, text="📁 Browse", command=lambda: self.browse_model('scaler_trojan'), width=10).pack(side=tk.LEFT, padx=2)
+        ttk.Button(btn_frame3, text="🔄 Load", command=lambda: self.reload_model('scaler_trojan'), width=8).pack(side=tk.LEFT, padx=2)
+
+        # Scaler APT
+        ttk.Label(models_grid, text="Scaler APT:", width=15).grid(row=3, column=0, sticky=tk.W, padx=5, pady=5)
+        scaler_apt_entry = ttk.Entry(models_grid, textvariable=self.scaler_apt_path, width=45, font=('Arial', 9))
+        scaler_apt_entry.grid(row=3, column=1, padx=5, sticky=tk.EW)
+        btn_frame4 = ttk.Frame(models_grid)
+        btn_frame4.grid(row=3, column=2, padx=5)
+        ttk.Button(btn_frame4, text="📁 Browse", command=lambda: self.browse_model('scaler_apt'), width=10).pack(side=tk.LEFT, padx=2)
+        ttk.Button(btn_frame4, text="🔄 Load", command=lambda: self.reload_model('scaler_apt'), width=8).pack(side=tk.LEFT, padx=2)
+
         models_grid.columnconfigure(1, weight=1)
         
         # Model status
@@ -794,12 +810,12 @@ class NetworkMonitorApp:
         blocked_frame = ttk.LabelFrame(main_container, text="🚫 Blocked", padding=5)
         blocked_frame.pack(pady=5, padx=10, fill=tk.X)
         
-        self.blocked_text = tk.Text(blocked_frame, height=2, font=('Consolas', 8), bg='#fff5f5')
+        self.blocked_text = tk.Text(blocked_frame, height=1, font=('Consolas', 8), bg='#fff5f5')
         self.blocked_text.pack(fill=tk.X)
         
         # Log
         ttk.Label(main_container, text="Detection & Mitigation Log:", font=('Segoe UI Emoji', 10, 'bold')).pack(pady=(5,2))
-        self.log_text = scrolledtext.ScrolledText(main_container, width=120, height=10, font=('Consolas', 8))
+        self.log_text = scrolledtext.ScrolledText(main_container, width=120, height=9, font=('Consolas', 8))
         self.log_text.pack(pady=5, padx=10, fill=tk.BOTH, expand=True)
         
         # Controls
@@ -819,14 +835,12 @@ class NetworkMonitorApp:
         self.view_quarantine_btn.pack(side=tk.LEFT, padx=5)
         
         # Initial log message
-        self.log_message("=" * 80)
         self.log_message("🎯 APT & TROJAN DETECTION SYSTEM - ADMINISTRATOR MODE")
         self.log_message("=" * 80)
         self.log_message("📌 STEP 1: Load AI models using Browse buttons above")
         self.log_message("📌 STEP 2: Click 'START MONITORING' to begin detection")
         self.log_message("📌 STEP 3: Threats will be automatically detected and mitigated")
         self.log_message("=" * 80)
-        self.log_message("")
         
         self.update_statistics_display()
     
@@ -837,10 +851,9 @@ class NetworkMonitorApp:
             self.log_message("⚠️ Auto-Mitigation DISABLED - Threats will only be logged")
     
     def browse_model(self, model_type):
-        """Browse and select model/scaler file."""
-        if model_type == 'scaler':
+        if model_type in ['scaler_trojan', 'scaler_apt']:
             filetypes = [("Pickle files", "*.pkl"), ("All files", "*.*")]
-            title = "Select Scaler File"
+            title = f"Select {model_type.replace('_', ' ').title()} File"
         else:
             filetypes = [("H5 Model files", "*.h5"), ("All files", "*.*")]
             title = f"Select {model_type.upper()} Model File"
@@ -857,9 +870,12 @@ class NetworkMonitorApp:
             elif model_type == 'apt':
                 self.apt_model_path.set(filename)
                 self.log_message(f"📁 Selected APT model: {os.path.basename(filename)}")
-            elif model_type == 'scaler':
-                self.scaler_path.set(filename)
-                self.log_message(f"📁 Selected Scaler: {os.path.basename(filename)}")
+            elif model_type == 'scaler_trojan':
+                self.scaler_trojan_path.set(filename)
+                self.log_message(f"📁 Selected Trojan Scaler: {os.path.basename(filename)}")
+            elif model_type == 'scaler_apt':
+                self.scaler_apt_path.set(filename)
+                self.log_message(f"📁 Selected APT Scaler: {os.path.basename(filename)}")
             
             # Auto-load after selection
             self.reload_model(model_type)
@@ -897,23 +913,37 @@ class NetworkMonitorApp:
                 self.apt_model = load_model(path)
                 self.log_message("✅ APT model loaded successfully!")
                 
-            elif model_type == 'scaler':
-                path = self.scaler_path.get()
+            elif model_type == 'scaler_trojan':
+                path = self.scaler_trojan_path.get()
                 if not path:
-                    messagebox.showwarning("Warning", "Please select Scaler file first!")
+                    messagebox.showwarning("Warning", "Please select Trojan Scaler file first!")
                     return
                 if not os.path.exists(path):
                     messagebox.showerror("Error", f"File not found: {path}")
                     return
                 
-                self.log_message(f"🔄 Loading Scaler from: {os.path.basename(path)}")
-                self.scaler = joblib.load(path)
-                self.log_message("✅ Scaler loaded successfully!")
+                self.log_message(f"🔄 Loading Trojan Scaler from: {os.path.basename(path)}")
+                self.scaler_trojan = joblib.load(path)
+                self.log_message("✅ Trojan Scaler loaded successfully!")
+                
+            elif model_type == 'scaler_apt':
+                path = self.scaler_apt_path.get()
+                if not path:
+                    messagebox.showwarning("Warning", "Please select APT Scaler file first!")
+                    return
+                if not os.path.exists(path):
+                    messagebox.showerror("Error", f"File not found: {path}")
+                    return
+                
+                self.log_message(f"🔄 Loading APT Scaler from: {os.path.basename(path)}")
+                self.scaler_apt = joblib.load(path)
+                self.log_message("✅ APT Scaler loaded successfully!")
             
             self.update_model_status()
             
             # Check if all models loaded
-            if self.trojan_model and self.apt_model and self.scaler:
+            if (self.trojan_model and self.apt_model and 
+                self.scaler_trojan and self.scaler_apt):
                 self.log_message("🎉 ALL MODELS LOADED - Ready to start monitoring!")
                 self.status_var.set("🟢 Ready - Click START MONITORING")
                 messagebox.showinfo("Success", "All AI models loaded successfully!\n\nYou can now start monitoring.")
@@ -945,26 +975,34 @@ class NetworkMonitorApp:
             else:
                 self.log_message(f"⚠️ APT model not found - please use Browse button")
             
-            # Load Scaler
-            if self.scaler_path.get() and os.path.exists(self.scaler_path.get()):
-                self.scaler = joblib.load(self.scaler_path.get())
-                self.log_message(f"✅ Scaler loaded: {os.path.basename(self.scaler_path.get())}")
+            # Load Trojan Scaler
+            if self.scaler_trojan_path.get() and os.path.exists(self.scaler_trojan_path.get()):
+                self.scaler_trojan = joblib.load(self.scaler_trojan_path.get())
+                self.log_message(f"✅ Trojan Scaler loaded: {os.path.basename(self.scaler_trojan_path.get())}")
                 success_count += 1
             else:
-                self.log_message(f"⚠️ Scaler not found - please use Browse button")
+                self.log_message(f"⚠️ Trojan Scaler not found - please use Browse button")
+            
+            # Load APT Scaler
+            if self.scaler_apt_path.get() and os.path.exists(self.scaler_apt_path.get()):
+                self.scaler_apt = joblib.load(self.scaler_apt_path.get())
+                self.log_message(f"✅ APT Scaler loaded: {os.path.basename(self.scaler_apt_path.get())}")
+                success_count += 1
+            else:
+                self.log_message(f"⚠️ APT Scaler not found - please use Browse button")
             
             self.update_model_status()
             
-            if success_count == 3:
+            if success_count == 4:
                 self.log_message("🎉 ALL MODELS LOADED SUCCESSFULLY - Ready to monitor!")
                 self.status_var.set("🟢 Ready - Click START MONITORING")
-                messagebox.showinfo("Success", "All 3 AI models loaded successfully!\n\nYou can now start monitoring.")
+                messagebox.showinfo("Success", "All 4 AI models loaded successfully!\n\nYou can now start monitoring.")
             elif success_count > 0:
-                self.log_message(f"⚠️ Partial load: {success_count}/3 models loaded")
-                messagebox.showwarning("Partial Load", f"Only {success_count}/3 models loaded.\n\nPlease load remaining models using Browse buttons.")
+                self.log_message(f"⚠️ Partial load: {success_count}/4 models loaded")
+                messagebox.showwarning("Partial Load", f"Only {success_count}/4 models loaded.\n\nPlease load remaining models using Browse buttons.")
             else:
                 self.log_message("❌ No models loaded - please use Browse buttons to select model files")
-                messagebox.showerror("Error", "No models found!\n\nPlease use Browse buttons to select:\n- Trojan model (.h5)\n- APT model (.h5)\n- Scaler (.pkl)")
+                messagebox.showerror("Error", "No models found!\n\nPlease use Browse buttons to select:\n- Trojan model (.h5)\n- APT model (.h5)\n- Trojan Scaler (.pkl)\n- APT Scaler (.pkl)")
                 
         except Exception as e:
             self.log_message(f"❌ Error loading models: {str(e)}")
@@ -985,14 +1023,20 @@ class NetworkMonitorApp:
         else:
             missing.append("APT ❌")
         
-        if self.scaler:
-            loaded.append("Scaler ✅")
+        if self.scaler_trojan:
+            loaded.append("Scaler-T ✅")
         else:
-            missing.append("Scaler ❌")
+            missing.append("Scaler-T ❌")
+        
+        if self.scaler_apt:
+            loaded.append("Scaler-A ✅")
+        else:
+            missing.append("Scaler-A ❌")
         
         status_text = "Models: " + " | ".join(loaded + missing)
         
-        if self.trojan_model and self.apt_model and self.scaler:
+        if (self.trojan_model and self.apt_model and 
+            self.scaler_trojan and self.scaler_apt):
             self.model_status_label.config(text=status_text + " - ALL READY! 🎉", foreground="green")
         elif loaded:
             self.model_status_label.config(text=status_text + " - INCOMPLETE ⚠️", foreground="orange")
@@ -1119,33 +1163,39 @@ Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"""
                                 f"Bwd: {features_apt['Total Bwd packets']}")
                     
                     # Check if models are loaded
-                    if not self.trojan_model or not self.apt_model or not self.scaler:
+                    if not self.trojan_model or not self.apt_model or not self.scaler_trojan or not self.scaler_apt:
                         self.log_message("⚠️ Models not loaded - skipping AI detection (flow logged only)")
                         return
-                    
-                    # Prepare Trojan features
+
+                    # Extract features for both models
+                    features_trojan = self.analyzer.extract_features_trojan(flow_packets)
+                    features_apt = self.analyzer.extract_features_apt(flow_packets)
+
+                    if not features_trojan or not features_apt:
+                        self.log_message("⚠️ Feature extraction failed")
+                        return
+
+                    # Prepare Trojan prediction
                     feature_df_trojan = pd.DataFrame([features_trojan])
-                    if len(feature_df_trojan.columns) != 78:
+                    if len(feature_df_trojan.columns) != 77:
                         self.log_message(f"⚠️ Trojan feature mismatch: expected 77, got {len(feature_df_trojan.columns)}")
                         return
-                    
-                    X_trojan = self.scaler.transform(feature_df_trojan)
+
+                    X_trojan = self.scaler_trojan.transform(feature_df_trojan)
                     X_trojan = X_trojan.reshape((1, 1, X_trojan.shape[1]))
-                    
-                    # Prepare APT features
+
+                    # Prepare APT prediction
                     feature_df_apt = pd.DataFrame([features_apt])
                     if len(feature_df_apt.columns) != 77:
                         self.log_message(f"⚠️ APT feature mismatch: expected 77, got {len(feature_df_apt.columns)}")
                         return
-                    
-                    X_apt = self.scaler.transform(feature_df_apt)
+
+                    X_apt = self.scaler_apt.transform(feature_df_apt)
                     X_apt = X_apt.reshape((1, 1, X_apt.shape[1]))
-                    
+
                     # Predict
                     trojan_prob = self.trojan_model.predict(X_trojan, verbose=0)[0][0]
                     apt_prob = self.apt_model.predict(X_apt, verbose=0)[0][0]
-                    
-                    # [Giữ nguyên phần còn lại]
                     
                     trojan_pred = 1 if trojan_prob > 0.5 else 0
                     apt_pred = 1 if apt_prob > 0.5 else 0
@@ -1235,7 +1285,7 @@ Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"""
     def start_monitoring(self):
         """Start packet sniffing."""
         # Check if models are loaded
-        if not self.trojan_model or not self.apt_model or not self.scaler:
+        if not self.trojan_model or not self.apt_model or not self.scaler_trojan or not self.scaler_apt:
             response = messagebox.askyesno(
                 "AI Models Not Loaded", 
                 "AI models are not loaded!\n\n"
@@ -1275,7 +1325,7 @@ Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"""
             
             layer_info = "Layer 3" if self.use_layer3 else "Layer 2"
             
-            if self.trojan_model and self.apt_model and self.scaler:
+            if self.trojan_model and self.apt_model and self.scaler_trojan and self.scaler_apt:
                 mode_info = "FULL DETECTION MODE 🎯"
                 mitigation_status = "AUTO-MITIGATION ON 🛡️" if self.auto_mitigate.get() else "DETECTION ONLY ⚠️"
             else:
