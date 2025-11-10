@@ -1076,7 +1076,7 @@ class NetworkMonitorApp:
     
     def update_statistics_display(self):
         """Update the statistics display in GUI."""
-        model_status = "READY ✅" if (self.trojan_model and self.apt_model and self.scaler) else "NOT READY ❌"
+        model_status = "READY ✅" if (self.trojan_model and self.apt_model and self.scaler_trojan and self.scaler_apt) else "NOT READY ❌"
         
         stats = f"""Packets: {self.analyzer.total_packets_captured:,} | Flows: {self.analyzer.total_flows_analyzed:,} | Active: {len(self.analyzer.flows):,}
 Trojan: {self.analyzer.trojan_detections} | APT: {self.analyzer.apt_detections} | Mitigated: {self.analyzer.threats_mitigated}
@@ -1177,8 +1177,8 @@ Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"""
 
                     # Prepare Trojan prediction
                     feature_df_trojan = pd.DataFrame([features_trojan])
-                    if len(feature_df_trojan.columns) != 77:
-                        self.log_message(f"⚠️ Trojan feature mismatch: expected 77, got {len(feature_df_trojan.columns)}")
+                    if len(feature_df_trojan.columns) != 78:
+                        self.log_message(f"⚠️ Trojan feature mismatch: expected 78, got {len(feature_df_trojan.columns)}")
                         return
 
                     X_trojan = self.scaler_trojan.transform(feature_df_trojan)

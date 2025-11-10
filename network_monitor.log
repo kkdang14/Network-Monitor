@@ -547,3 +547,33 @@ AttributeError: 'NetworkMonitorApp' object has no attribute 'try_auto_load_model
 2025-11-10 17:53:31,649 - INFO -  Trojan Scaler not found - please use Browse button
 2025-11-10 17:53:31,653 - INFO -  APT Scaler not found - please use Browse button
 2025-11-10 17:53:31,669 - INFO -  Partial load: 2/4 models loaded
+2025-11-10 18:11:29,059 - INFO - ✅ Running with Administrator privileges
+2025-11-10 18:11:29,099 - INFO - ✅ Npcap detected
+2025-11-10 18:11:29,100 - INFO - Available interfaces: ['\\Device\\NPF_{57FBB57A-D862-486C-9A50-334CE4F0D575}', '\\Device\\NPF_{55AD7806-AE51-47CA-8013-B76F8518111C}', '\\Device\\NPF_{9B2F22A0-C8E5-479F-8AE9-FA3251412798}', '\\Device\\NPF_{7E5F1C8A-4C9F-4D19-9F4E-28615920595A}', '\\Device\\NPF_{487077D1-5096-44C8-BA54-610D885E0E63}', '\\Device\\NPF_{D8676F0C-7705-43EB-9A18-B730C650EA6D}', '\\Device\\NPF_{C4C19317-F2E5-4BEF-91E4-1E71C937E55E}', '\\Device\\NPF_Loopback']
+2025-11-10 18:11:29,887 - INFO -  APT & TROJAN DETECTION SYSTEM - ADMINISTRATOR MODE
+2025-11-10 18:11:29,896 - INFO - ================================================================================
+2025-11-10 18:11:29,911 - INFO -  STEP 1: Load AI models using Browse buttons above
+2025-11-10 18:11:29,916 - INFO -  STEP 2: Click 'START MONITORING' to begin detection
+2025-11-10 18:11:29,920 - INFO -  STEP 3: Threats will be automatically detected and mitigated
+2025-11-10 18:11:29,925 - INFO - ================================================================================
+2025-11-10 18:11:29,945 - INFO -  Found model files, attempting auto-load...
+2025-11-10 18:11:29,951 - INFO -  Loading all AI models...
+2025-11-10 18:11:30,238 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-11-10 18:11:30,253 - INFO -  Trojan model loaded: trojan_lstm_model.h5
+2025-11-10 18:11:30,307 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-11-10 18:11:30,315 - INFO -  APT model loaded: apt_lstm_model.h5
+2025-11-10 18:11:30,334 - INFO -  Trojan Scaler not found - please use Browse button
+2025-11-10 18:11:30,339 - INFO -  APT Scaler not found - please use Browse button
+2025-11-10 18:11:30,355 - INFO -  Partial load: 2/4 models loaded
+2025-11-10 18:11:43,077 - INFO -  Selected Trojan Scaler: scaler_trojan_lstm.pkl
+2025-11-10 18:11:43,079 - INFO -  Loading Trojan Scaler from: scaler_trojan_lstm.pkl
+2025-11-10 18:11:43,114 - INFO -  Trojan Scaler loaded successfully!
+2025-11-10 18:11:48,403 - INFO -  Selected APT Scaler: scaler_apt_lstm.pkl
+2025-11-10 18:11:48,405 - INFO -  Loading APT Scaler from: scaler_apt_lstm.pkl
+2025-11-10 18:11:48,416 - INFO -  APT Scaler loaded successfully!
+2025-11-10 18:11:48,448 - INFO -  ALL MODELS LOADED - Ready to start monitoring!
+2025-11-10 18:11:55,714 - INFO -  Npcap detected - using Layer 2 sniffing
+2025-11-10 18:11:55,727 - INFO -  Selected interface: Local Area Connection* 1 (IP: fe80::b6e2:7888:8c40:d5cc)
+2025-11-10 18:11:55,737 - INFO -  Started monitoring on 'Local Area Connection* 1' (Layer 2)
+2025-11-10 18:11:55,740 - INFO -  Mode: FULL DETECTION MODE  - AUTO-MITIGATION ON 
+2025-11-10 18:11:55,751 - INFO -  Waiting for network traffic...
