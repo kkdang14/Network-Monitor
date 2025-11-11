@@ -577,3 +577,53 @@ AttributeError: 'NetworkMonitorApp' object has no attribute 'try_auto_load_model
 2025-11-10 18:11:55,737 - INFO -  Started monitoring on 'Local Area Connection* 1' (Layer 2)
 2025-11-10 18:11:55,740 - INFO -  Mode: FULL DETECTION MODE  - AUTO-MITIGATION ON 
 2025-11-10 18:11:55,751 - INFO -  Waiting for network traffic...
+2025-11-10 18:14:52,189 - INFO - ✅ Running with Administrator privileges
+2025-11-10 18:14:52,217 - INFO - ✅ Npcap detected
+2025-11-10 18:14:52,217 - INFO - Available interfaces: ['\\Device\\NPF_{57FBB57A-D862-486C-9A50-334CE4F0D575}', '\\Device\\NPF_{55AD7806-AE51-47CA-8013-B76F8518111C}', '\\Device\\NPF_{9B2F22A0-C8E5-479F-8AE9-FA3251412798}', '\\Device\\NPF_{7E5F1C8A-4C9F-4D19-9F4E-28615920595A}', '\\Device\\NPF_{487077D1-5096-44C8-BA54-610D885E0E63}', '\\Device\\NPF_{D8676F0C-7705-43EB-9A18-B730C650EA6D}', '\\Device\\NPF_{C4C19317-F2E5-4BEF-91E4-1E71C937E55E}', '\\Device\\NPF_Loopback']
+2025-11-10 18:14:52,732 - INFO -  APT & TROJAN DETECTION SYSTEM - ADMINISTRATOR MODE
+2025-11-10 18:14:52,741 - INFO - ================================================================================
+2025-11-10 18:14:52,756 - INFO -  STEP 1: Load AI models using Browse buttons above
+2025-11-10 18:14:52,761 - INFO -  STEP 2: Click 'START MONITORING' to begin detection
+2025-11-10 18:14:52,765 - INFO -  STEP 3: Threats will be automatically detected and mitigated
+2025-11-10 18:14:52,769 - INFO - ================================================================================
+2025-11-10 18:14:52,785 - INFO -  Found model files, attempting auto-load...
+2025-11-10 18:14:52,795 - INFO -  Loading all AI models...
+2025-11-10 18:14:52,947 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-11-10 18:14:52,959 - INFO -  Trojan model loaded: trojan_lstm_model.h5
+2025-11-10 18:14:53,015 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-11-10 18:14:53,020 - INFO -  APT model loaded: apt_lstm_model.h5
+2025-11-10 18:14:53,040 - INFO -  Trojan Scaler not found - please use Browse button
+2025-11-10 18:14:53,047 - INFO -  APT Scaler not found - please use Browse button
+2025-11-10 18:14:53,062 - INFO -  Partial load: 2/4 models loaded
+2025-11-10 18:14:59,483 - INFO -  Selected Trojan Scaler: scaler_trojan_lstm.pkl
+2025-11-10 18:14:59,485 - INFO -  Loading Trojan Scaler from: scaler_trojan_lstm.pkl
+2025-11-10 18:14:59,490 - INFO -  Trojan Scaler loaded successfully!
+2025-11-10 18:15:02,965 - INFO -  Selected APT Scaler: scaler_apt_lstm.pkl
+2025-11-10 18:15:02,967 - INFO -  Loading APT Scaler from: scaler_apt_lstm.pkl
+2025-11-10 18:15:02,969 - INFO -  APT Scaler loaded successfully!
+2025-11-10 18:15:02,992 - INFO -  ALL MODELS LOADED - Ready to start monitoring!
+2025-11-10 18:15:04,627 - INFO -  Loading all AI models...
+2025-11-10 18:15:04,677 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-11-10 18:15:04,681 - INFO -  Trojan model loaded: trojan_lstm_model.h5
+2025-11-10 18:15:04,730 - WARNING - Compiled the loaded model, but the compiled metrics have yet to be built. `model.compile_metrics` will be empty until you train or evaluate the model.
+2025-11-10 18:15:04,734 - INFO -  APT model loaded: apt_lstm_model.h5
+2025-11-10 18:15:04,736 - INFO -  Trojan Scaler loaded: scaler_trojan_lstm.pkl
+2025-11-10 18:15:04,739 - INFO -  APT Scaler loaded: scaler_apt_lstm.pkl
+2025-11-10 18:15:04,741 - INFO -  ALL MODELS LOADED SUCCESSFULLY - Ready to monitor!
+2025-11-10 18:15:08,176 - INFO -  Npcap detected - using Layer 2 sniffing
+2025-11-10 18:15:08,189 - INFO -  Selected interface: Local Area Connection* 1 (IP: fe80::b6e2:7888:8c40:d5cc)
+2025-11-10 18:15:08,200 - INFO -  Started monitoring on 'Local Area Connection* 1' (Layer 2)
+2025-11-10 18:15:08,202 - INFO -  Mode: FULL DETECTION MODE  - AUTO-MITIGATION ON 
+2025-11-10 18:15:08,211 - INFO -  Waiting for network traffic...
+2025-11-10 18:15:26,960 - INFO -  Stopped network monitoring
+2025-11-10 18:15:26,963 - INFO - ================================================================================
+2025-11-10 18:15:26,967 - INFO -  FINAL STATISTICS
+2025-11-10 18:15:26,968 - INFO -    Packets: 0
+2025-11-10 18:15:26,970 - INFO -    Flows: 0
+2025-11-10 18:15:26,971 - INFO -    Trojan: 0
+2025-11-10 18:15:26,974 - INFO -    APT: 0
+2025-11-10 18:15:26,976 - INFO -    Mitigated: 0
+2025-11-10 18:15:26,977 - INFO -    Blocked IPs: 0
+2025-11-10 18:15:26,978 - INFO -    Killed Processes: 0
+2025-11-10 18:15:26,979 - INFO -    Quarantine Files: 0
+2025-11-10 18:15:26,981 - INFO - ================================================================================

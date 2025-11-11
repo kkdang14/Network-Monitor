@@ -349,8 +349,8 @@ class NetworkFlowAnalyzer:
             logging.error(f"Error generating flow key: {str(e)}")
             return None
     
-    def extract_features(self, flow_packets):
-        """Extract exactly 77 CICFlowMeter features matching the trained model."""
+    def extract_features_trojan(self, flow_packets):
+        """Extract 77 features for TROJAN detection (set 1)."""
         if not flow_packets:
             return None
             
@@ -362,6 +362,7 @@ class NetworkFlowAnalyzer:
             logging.error("Invalid packet data in flow")
             return None
         
+        # [Giữ nguyên phần tính toán statistics như code cũ]
         fwd_packets, bwd_packets = 0, 0
         fwd_bytes, bwd_bytes = 0, 0
         fwd_lengths, bwd_lengths = [], []
@@ -379,14 +380,13 @@ class NetworkFlowAnalyzer:
                 pkt_len = len(packet)
                 packet_lengths.append(pkt_len)
                 
-                iat = (pkt_time - prev_time) * 1000000  # microseconds
+                iat = (pkt_time - prev_time) * 1000000
                 iat_intervals.append(iat)
                 prev_time = pkt_time
                 
                 src_port = packet[TCP].sport if TCP in packet else packet[UDP].sport if UDP in packet else 0
                 dst_port = packet[TCP].dport if TCP in packet else packet[UDP].dport if UDP in packet else 0
                 
-                # Determine forward/backward based on port numbers
                 if src_port > 1024 and dst_port <= 1024:
                     fwd_packets += 1
                     fwd_bytes += pkt_len
@@ -400,7 +400,6 @@ class NetworkFlowAnalyzer:
                     if len(bwd_iat) > 0 or bwd_packets > 1:
                         bwd_iat.append(iat)
                 
-                # Extract TCP flags
                 if TCP in packet:
                     flags['FIN'] += 1 if packet[TCP].flags & 0x01 else 0
                     flags['SYN'] += 1 if packet[TCP].flags & 0x02 else 0
@@ -413,127 +412,232 @@ class NetworkFlowAnalyzer:
             except Exception as e:
                 continue
         
-        # Calculate statistics
         total_packets = fwd_packets + bwd_packets
         total_bytes = fwd_bytes + bwd_bytes
         flow_duration_sec = flow_duration / 1000000 if flow_duration > 0 else 0.000001
         
-        # Create features dictionary with EXACT names from your model (77 features)
+        # TROJAN FEATURES (Set 1) - CHÚ Ý TÊN KHÁC
         features = {
-            # 1. Protocol
             'Protocol': 6 if TCP in flow_packets[0] else 17,
-            
-            # 2. Flow Duration
             'Flow Duration': flow_duration,
-            
-            # 3-4. Packet counts
-            'Total Fwd Packet': fwd_packets,
-            'Total Bwd packets': bwd_packets,
-            
-            # 5-6. Byte counts
-            'Total Length of Fwd Packet': fwd_bytes,
-            'Total Length of Bwd Packet': bwd_bytes,
-            
-            # 7-10. Forward packet length stats
+            'Total Fwd Packets': fwd_packets,  # Khác: "Packets" (có s)
+            'Total Backward Packets': bwd_packets,  # Khác: "Backward Packets"
+            'Total Length of Fwd Packets': fwd_bytes,  # Khác: "Packets" (có s)
+            'Total Length of Bwd Packets': bwd_bytes,  # Khác: "Packets" (có s)
             'Fwd Packet Length Max': max(fwd_lengths) if fwd_lengths else 0,
             'Fwd Packet Length Min': min(fwd_lengths) if fwd_lengths else 0,
             'Fwd Packet Length Mean': np.mean(fwd_lengths) if fwd_lengths else 0,
             'Fwd Packet Length Std': np.std(fwd_lengths) if fwd_lengths else 0,
-            
-            # 11-14. Backward packet length stats
             'Bwd Packet Length Max': max(bwd_lengths) if bwd_lengths else 0,
             'Bwd Packet Length Min': min(bwd_lengths) if bwd_lengths else 0,
             'Bwd Packet Length Mean': np.mean(bwd_lengths) if bwd_lengths else 0,
             'Bwd Packet Length Std': np.std(bwd_lengths) if bwd_lengths else 0,
-            
-            # 15-16. Flow rates
             'Flow Bytes/s': total_bytes / flow_duration_sec,
             'Flow Packets/s': total_packets / flow_duration_sec,
-            
-            # 17-20. Flow IAT stats
             'Flow IAT Mean': np.mean(iat_intervals) if iat_intervals else 0,
             'Flow IAT Std': np.std(iat_intervals) if iat_intervals else 0,
             'Flow IAT Max': max(iat_intervals) if iat_intervals else 0,
             'Flow IAT Min': min(iat_intervals) if iat_intervals else 0,
-            
-            # 21-25. Forward IAT stats
             'Fwd IAT Total': sum(fwd_iat) if fwd_iat else 0,
             'Fwd IAT Mean': np.mean(fwd_iat) if fwd_iat else 0,
             'Fwd IAT Std': np.std(fwd_iat) if fwd_iat else 0,
             'Fwd IAT Max': max(fwd_iat) if fwd_iat else 0,
             'Fwd IAT Min': min(fwd_iat) if fwd_iat else 0,
-            
-            # 26-30. Backward IAT stats
             'Bwd IAT Total': sum(bwd_iat) if bwd_iat else 0,
             'Bwd IAT Mean': np.mean(bwd_iat) if bwd_iat else 0,
             'Bwd IAT Std': np.std(bwd_iat) if bwd_iat else 0,
             'Bwd IAT Max': max(bwd_iat) if bwd_iat else 0,
             'Bwd IAT Min': min(bwd_iat) if bwd_iat else 0,
-            
-            # 31-34. PSH and URG flags
             'Fwd PSH Flags': flags['PSH'],
-            'Bwd PSH Flags': 0,  # Typically 0 for backward
+            'Bwd PSH Flags': 0,
             'Fwd URG Flags': flags['URG'],
-            'Bwd URG Flags': 0,  # Typically 0 for backward
-            
-            # 35-36. Header lengths (20 bytes per TCP packet, 8 per UDP)
+            'Bwd URG Flags': 0,
             'Fwd Header Length': (20 if TCP in flow_packets[0] else 8) * fwd_packets,
             'Bwd Header Length': (20 if TCP in flow_packets[0] else 8) * bwd_packets,
-            
-            # 37-38. Packet rates per direction
             'Fwd Packets/s': fwd_packets / flow_duration_sec,
             'Bwd Packets/s': bwd_packets / flow_duration_sec,
-            
-            # 39-43. Packet length statistics (all packets)
-            'Packet Length Min': min(packet_lengths) if packet_lengths else 0,
-            'Packet Length Max': max(packet_lengths) if packet_lengths else 0,
+            'Min Packet Length': min(packet_lengths) if packet_lengths else 0,
+            'Max Packet Length': max(packet_lengths) if packet_lengths else 0,
             'Packet Length Mean': np.mean(packet_lengths) if packet_lengths else 0,
             'Packet Length Std': np.std(packet_lengths) if packet_lengths else 0,
             'Packet Length Variance': np.var(packet_lengths) if packet_lengths else 0,
-            
-            # 44-51. TCP flags
             'FIN Flag Count': flags['FIN'],
             'SYN Flag Count': flags['SYN'],
             'RST Flag Count': flags['RST'],
             'PSH Flag Count': flags['PSH'],
             'ACK Flag Count': flags['ACK'],
             'URG Flag Count': flags['URG'],
-            'CWR Flag Count': flags['CWR'],
+            'CWE Flag Count': flags['CWR'],  # Khác: "CWE" thay vì "CWR"
             'ECE Flag Count': flags['ECE'],
-            
-            # 52. Down/Up ratio
             'Down/Up Ratio': bwd_bytes / fwd_bytes if fwd_bytes > 0 else 0,
-            
-            # 53. Average packet size
             'Average Packet Size': total_bytes / total_packets if total_packets > 0 else 0,
+            'Avg Fwd Segment Size': np.mean(fwd_lengths) if fwd_lengths else 0,
+            'Avg Bwd Segment Size': np.mean(bwd_lengths) if bwd_lengths else 0,
+            'Fwd Header Length.1': (20 if TCP in flow_packets[0] else 8) * fwd_packets,  # Khác: thêm ".1"
+            'Fwd Avg Bytes/Bulk': 0,
+            'Fwd Avg Packets/Bulk': 0,
+            'Fwd Avg Bulk Rate': 0,
+            'Bwd Avg Bytes/Bulk': 0,
+            'Bwd Avg Packets/Bulk': 0,
+            'Bwd Avg Bulk Rate': 0,
+            'Subflow Fwd Packets': fwd_packets,
+            'Subflow Fwd Bytes': fwd_bytes,
+            'Subflow Bwd Packets': bwd_packets,
+            'Subflow Bwd Bytes': bwd_bytes,
+            'Init_Win_bytes_forward': 65535,  # Khác: dấu gạch dưới
+            'Init_Win_bytes_backward': 65535,  # Khác: dấu gạch dưới
+            'act_data_pkt_fwd': fwd_packets,  # Khác: chữ thường và gạch dưới
+            'min_seg_size_forward': 20,  # Khác: chữ thường và gạch dưới
+            'Active Mean': 0,
+            'Active Std': 0,
+            'Active Max': 0,
+            'Active Min': 0,
+            'Idle Mean': 0,
+            'Idle Std': 0,
+            'Idle Max': 0,
+            'Idle Min': 0
+        }
+        
+        return features
+
+    def extract_features_apt(self, flow_packets):
+        """Extract 77 features for APT detection (set 2)."""
+        if not flow_packets:
+            return None
             
-            # 54-55. Segment size averages
-            'Fwd Segment Size Avg': np.mean(fwd_lengths) if fwd_lengths else 0,
+        try:
+            start_time = min(p.time for p in flow_packets)
+            end_time = max(p.time for p in flow_packets)
+            flow_duration = (end_time - start_time) * 1000000
+        except AttributeError:
+            logging.error("Invalid packet data in flow")
+            return None
+        
+        # [Giữ nguyên phần tính toán statistics]
+        fwd_packets, bwd_packets = 0, 0
+        fwd_bytes, bwd_bytes = 0, 0
+        fwd_lengths, bwd_lengths = [], []
+        iat_intervals = []
+        fwd_iat, bwd_iat = [], []
+        flags = defaultdict(int)
+        packet_lengths = []
+        
+        sorted_packets = sorted(flow_packets, key=lambda p: p.time)
+        prev_time = start_time
+        
+        for packet in sorted_packets:
+            try:
+                pkt_time = packet.time
+                pkt_len = len(packet)
+                packet_lengths.append(pkt_len)
+                
+                iat = (pkt_time - prev_time) * 1000000
+                iat_intervals.append(iat)
+                prev_time = pkt_time
+                
+                src_port = packet[TCP].sport if TCP in packet else packet[UDP].sport if UDP in packet else 0
+                dst_port = packet[TCP].dport if TCP in packet else packet[UDP].dport if UDP in packet else 0
+                
+                if src_port > 1024 and dst_port <= 1024:
+                    fwd_packets += 1
+                    fwd_bytes += pkt_len
+                    fwd_lengths.append(pkt_len)
+                    if len(fwd_iat) > 0 or fwd_packets > 1:
+                        fwd_iat.append(iat)
+                else:
+                    bwd_packets += 1
+                    bwd_bytes += pkt_len
+                    bwd_lengths.append(pkt_len)
+                    if len(bwd_iat) > 0 or bwd_packets > 1:
+                        bwd_iat.append(iat)
+                
+                if TCP in packet:
+                    flags['FIN'] += 1 if packet[TCP].flags & 0x01 else 0
+                    flags['SYN'] += 1 if packet[TCP].flags & 0x02 else 0
+                    flags['RST'] += 1 if packet[TCP].flags & 0x04 else 0
+                    flags['PSH'] += 1 if packet[TCP].flags & 0x08 else 0
+                    flags['ACK'] += 1 if packet[TCP].flags & 0x10 else 0
+                    flags['URG'] += 1 if packet[TCP].flags & 0x20 else 0
+                    flags['CWR'] += 1 if packet[TCP].flags & 0x80 else 0
+                    flags['ECE'] += 1 if packet[TCP].flags & 0x40 else 0
+            except Exception as e:
+                continue
+        
+        total_packets = fwd_packets + bwd_packets
+        total_bytes = fwd_bytes + bwd_bytes
+        flow_duration_sec = flow_duration / 1000000 if flow_duration > 0 else 0.000001
+        
+        # APT FEATURES (Set 2)
+        features = {
+            'Protocol': 6 if TCP in flow_packets[0] else 17,
+            'Flow Duration': flow_duration,
+            'Total Fwd Packet': fwd_packets,  # Không có "s"
+            'Total Bwd packets': bwd_packets,  # Chữ thường "packets"
+            'Total Length of Fwd Packet': fwd_bytes,  # Không có "s"
+            'Total Length of Bwd Packet': bwd_bytes,  # Không có "s"
+            'Fwd Packet Length Max': max(fwd_lengths) if fwd_lengths else 0,
+            'Fwd Packet Length Min': min(fwd_lengths) if fwd_lengths else 0,
+            'Fwd Packet Length Mean': np.mean(fwd_lengths) if fwd_lengths else 0,
+            'Fwd Packet Length Std': np.std(fwd_lengths) if fwd_lengths else 0,
+            'Bwd Packet Length Max': max(bwd_lengths) if bwd_lengths else 0,
+            'Bwd Packet Length Min': min(bwd_lengths) if bwd_lengths else 0,
+            'Bwd Packet Length Mean': np.mean(bwd_lengths) if bwd_lengths else 0,
+            'Bwd Packet Length Std': np.std(bwd_lengths) if bwd_lengths else 0,
+            'Flow Bytes/s': total_bytes / flow_duration_sec,
+            'Flow Packets/s': total_packets / flow_duration_sec,
+            'Flow IAT Mean': np.mean(iat_intervals) if iat_intervals else 0,
+            'Flow IAT Std': np.std(iat_intervals) if iat_intervals else 0,
+            'Flow IAT Max': max(iat_intervals) if iat_intervals else 0,
+            'Flow IAT Min': min(iat_intervals) if iat_intervals else 0,
+            'Fwd IAT Total': sum(fwd_iat) if fwd_iat else 0,
+            'Fwd IAT Mean': np.mean(fwd_iat) if fwd_iat else 0,
+            'Fwd IAT Std': np.std(fwd_iat) if fwd_iat else 0,
+            'Fwd IAT Max': max(fwd_iat) if fwd_iat else 0,
+            'Fwd IAT Min': min(fwd_iat) if fwd_iat else 0,
+            'Bwd IAT Total': sum(bwd_iat) if bwd_iat else 0,
+            'Bwd IAT Mean': np.mean(bwd_iat) if bwd_iat else 0,
+            'Bwd IAT Std': np.std(bwd_iat) if bwd_iat else 0,
+            'Bwd IAT Max': max(bwd_iat) if bwd_iat else 0,
+            'Bwd IAT Min': min(bwd_iat) if bwd_iat else 0,
+            'Fwd PSH Flags': flags['PSH'],
+            'Bwd PSH Flags': 0,
+            'Fwd URG Flags': flags['URG'],
+            'Bwd URG Flags': 0,
+            'Fwd Header Length': (20 if TCP in flow_packets[0] else 8) * fwd_packets,
+            'Bwd Header Length': (20 if TCP in flow_packets[0] else 8) * bwd_packets,
+            'Fwd Packets/s': fwd_packets / flow_duration_sec,
+            'Bwd Packets/s': bwd_packets / flow_duration_sec,
+            'Packet Length Min': min(packet_lengths) if packet_lengths else 0,
+            'Packet Length Max': max(packet_lengths) if packet_lengths else 0,
+            'Packet Length Mean': np.mean(packet_lengths) if packet_lengths else 0,
+            'Packet Length Std': np.std(packet_lengths) if packet_lengths else 0,
+            'Packet Length Variance': np.var(packet_lengths) if packet_lengths else 0,
+            'FIN Flag Count': flags['FIN'],
+            'SYN Flag Count': flags['SYN'],
+            'RST Flag Count': flags['RST'],
+            'PSH Flag Count': flags['PSH'],
+            'ACK Flag Count': flags['ACK'],
+            'URG Flag Count': flags['URG'],
+            'CWR Flag Count': flags['CWR'],  # "CWR" đúng
+            'ECE Flag Count': flags['ECE'],
+            'Down/Up Ratio': bwd_bytes / fwd_bytes if fwd_bytes > 0 else 0,
+            'Average Packet Size': total_bytes / total_packets if total_packets > 0 else 0,
+            'Fwd Segment Size Avg': np.mean(fwd_lengths) if fwd_lengths else 0,  # "Segment Size Avg"
             'Bwd Segment Size Avg': np.mean(bwd_lengths) if bwd_lengths else 0,
-            
-            # 56-61. Bulk transfer features (typically 0 for most flows)
-            'Fwd Bytes/Bulk Avg': 0,
+            'Fwd Bytes/Bulk Avg': 0,  # "Bytes/Bulk Avg"
             'Fwd Packet/Bulk Avg': 0,
             'Fwd Bulk Rate Avg': 0,
             'Bwd Bytes/Bulk Avg': 0,
             'Bwd Packet/Bulk Avg': 0,
             'Bwd Bulk Rate Avg': 0,
-            
-            # 62-65. Subflow features
             'Subflow Fwd Packets': fwd_packets,
             'Subflow Fwd Bytes': fwd_bytes,
             'Subflow Bwd Packets': bwd_packets,
             'Subflow Bwd Bytes': bwd_bytes,
-            
-            # 66-67. Initial window bytes
-            'FWD Init Win Bytes': 65535,  # Default TCP window size
-            'Bwd Init Win Bytes': 65535,
-            
-            # 68-69. Active data packets
-            'Fwd Act Data Pkts': fwd_packets,
-            'Fwd Seg Size Min': 20,  # Minimum TCP header size
-            
-            # 70-77. Active and Idle time statistics (require more complex calculation)
+            'FWD Init Win Bytes': 65535,  # Chữ in hoa "FWD"
+            'Bwd Init Win Bytes': 65535,  # Chữ in hoa "Bwd"
+            'Fwd Act Data Pkts': fwd_packets,  # Không có gạch dưới
+            'Fwd Seg Size Min': 20,  # "Seg Size Min"
             'Active Mean': 0,
             'Active Std': 0,
             'Active Max': 0,
@@ -558,12 +662,14 @@ class NetworkMonitorApp:
         # Model paths - DEFAULT TO EMPTY (will be set by user)
         self.trojan_model_path = tk.StringVar(value='')
         self.apt_model_path = tk.StringVar(value='')
-        self.scaler_path = tk.StringVar(value='')
-        
+        self.scaler_trojan_path = tk.StringVar(value='')
+        self.scaler_apt_path = tk.StringVar(value='')
+
         # Models - START AS NONE
         self.trojan_model = None
         self.apt_model = None
-        self.scaler = None
+        self.scaler_trojan = None
+        self.scaler_apt = None
         
         # Initialize mitigation engine
         self.mitigation_engine = ThreatMitigationEngine(self.log_message)
@@ -583,23 +689,28 @@ class NetworkMonitorApp:
         possible_paths = [
             ('trojan_lstm_model.h5', 'trojan'),
             ('apt_lstm_model.h5', 'apt'),
-            ('scaler_apt.pkl', 'scaler'),
+            ('scaler_trojan.pkl', 'scaler_trojan'),
+            ('scaler_apt.pkl', 'scaler_apt'),
             ('models/trojan_lstm_model.h5', 'trojan'),
             ('models/apt_lstm_model.h5', 'apt'),
-            ('models/scaler_apt.pkl', 'scaler'),
+            ('models/scaler_trojan.pkl', 'scaler_trojan'),
+            ('models/scaler_apt.pkl', 'scaler_apt'),
         ]
-        
+
         for path, model_type in possible_paths:
             if os.path.exists(path):
                 if model_type == 'trojan' and not self.trojan_model_path.get():
                     self.trojan_model_path.set(path)
                 elif model_type == 'apt' and not self.apt_model_path.get():
                     self.apt_model_path.set(path)
-                elif model_type == 'scaler' and not self.scaler_path.get():
-                    self.scaler_path.set(path)
-        
+                elif model_type == 'scaler_trojan' and not self.scaler_trojan_path.get():
+                    self.scaler_trojan_path.set(path)
+                elif model_type == 'scaler_apt' and not self.scaler_apt_path.get():
+                    self.scaler_apt_path.set(path)
+
         # Try to load if paths were found
-        if self.trojan_model_path.get() or self.apt_model_path.get() or self.scaler_path.get():
+        if (self.trojan_model_path.get() or self.apt_model_path.get() or 
+            self.scaler_trojan_path.get() or self.scaler_apt_path.get()):
             self.log_message("🔍 Found model files, attempting auto-load...")
             self.load_all_models()
     
@@ -631,34 +742,43 @@ class NetworkMonitorApp:
         
         models_grid = ttk.Frame(model_frame)
         models_grid.pack(fill=tk.X)
-        
+
         # Trojan Model
-        ttk.Label(models_grid, text="Trojan Model:", width=12).grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
-        trojan_entry = ttk.Entry(models_grid, textvariable=self.trojan_model_path, width=50, font=('Arial', 9))
+        ttk.Label(models_grid, text="Trojan Model:", width=15).grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
+        trojan_entry = ttk.Entry(models_grid, textvariable=self.trojan_model_path, width=45, font=('Arial', 9))
         trojan_entry.grid(row=0, column=1, padx=5, sticky=tk.EW)
         btn_frame1 = ttk.Frame(models_grid)
         btn_frame1.grid(row=0, column=2, padx=5)
         ttk.Button(btn_frame1, text="📁 Browse", command=lambda: self.browse_model('trojan'), width=10).pack(side=tk.LEFT, padx=2)
         ttk.Button(btn_frame1, text="🔄 Load", command=lambda: self.reload_model('trojan'), width=8).pack(side=tk.LEFT, padx=2)
-        
+
         # APT Model
-        ttk.Label(models_grid, text="APT Model:", width=12).grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
-        apt_entry = ttk.Entry(models_grid, textvariable=self.apt_model_path, width=50, font=('Arial', 9))
+        ttk.Label(models_grid, text="APT Model:", width=15).grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
+        apt_entry = ttk.Entry(models_grid, textvariable=self.apt_model_path, width=45, font=('Arial', 9))
         apt_entry.grid(row=1, column=1, padx=5, sticky=tk.EW)
         btn_frame2 = ttk.Frame(models_grid)
         btn_frame2.grid(row=1, column=2, padx=5)
         ttk.Button(btn_frame2, text="📁 Browse", command=lambda: self.browse_model('apt'), width=10).pack(side=tk.LEFT, padx=2)
         ttk.Button(btn_frame2, text="🔄 Load", command=lambda: self.reload_model('apt'), width=8).pack(side=tk.LEFT, padx=2)
-        
-        # Scaler
-        ttk.Label(models_grid, text="Scaler:", width=12).grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
-        scaler_entry = ttk.Entry(models_grid, textvariable=self.scaler_path, width=50, font=('Arial', 9))
-        scaler_entry.grid(row=2, column=1, padx=5, sticky=tk.EW)
+
+        # Scaler Trojan
+        ttk.Label(models_grid, text="Scaler Trojan:", width=15).grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
+        scaler_trojan_entry = ttk.Entry(models_grid, textvariable=self.scaler_trojan_path, width=45, font=('Arial', 9))
+        scaler_trojan_entry.grid(row=2, column=1, padx=5, sticky=tk.EW)
         btn_frame3 = ttk.Frame(models_grid)
         btn_frame3.grid(row=2, column=2, padx=5)
-        ttk.Button(btn_frame3, text="📁 Browse", command=lambda: self.browse_model('scaler'), width=10).pack(side=tk.LEFT, padx=2)
-        ttk.Button(btn_frame3, text="🔄 Load", command=lambda: self.reload_model('scaler'), width=8).pack(side=tk.LEFT, padx=2)
-        
+        ttk.Button(btn_frame3, text="📁 Browse", command=lambda: self.browse_model('scaler_trojan'), width=10).pack(side=tk.LEFT, padx=2)
+        ttk.Button(btn_frame3, text="🔄 Load", command=lambda: self.reload_model('scaler_trojan'), width=8).pack(side=tk.LEFT, padx=2)
+
+        # Scaler APT
+        ttk.Label(models_grid, text="Scaler APT:", width=15).grid(row=3, column=0, sticky=tk.W, padx=5, pady=5)
+        scaler_apt_entry = ttk.Entry(models_grid, textvariable=self.scaler_apt_path, width=45, font=('Arial', 9))
+        scaler_apt_entry.grid(row=3, column=1, padx=5, sticky=tk.EW)
+        btn_frame4 = ttk.Frame(models_grid)
+        btn_frame4.grid(row=3, column=2, padx=5)
+        ttk.Button(btn_frame4, text="📁 Browse", command=lambda: self.browse_model('scaler_apt'), width=10).pack(side=tk.LEFT, padx=2)
+        ttk.Button(btn_frame4, text="🔄 Load", command=lambda: self.reload_model('scaler_apt'), width=8).pack(side=tk.LEFT, padx=2)
+
         models_grid.columnconfigure(1, weight=1)
         
         # Model status
@@ -690,12 +810,12 @@ class NetworkMonitorApp:
         blocked_frame = ttk.LabelFrame(main_container, text="🚫 Blocked", padding=5)
         blocked_frame.pack(pady=5, padx=10, fill=tk.X)
         
-        self.blocked_text = tk.Text(blocked_frame, height=2, font=('Consolas', 8), bg='#fff5f5')
+        self.blocked_text = tk.Text(blocked_frame, height=1, font=('Consolas', 8), bg='#fff5f5')
         self.blocked_text.pack(fill=tk.X)
         
         # Log
         ttk.Label(main_container, text="Detection & Mitigation Log:", font=('Segoe UI Emoji', 10, 'bold')).pack(pady=(5,2))
-        self.log_text = scrolledtext.ScrolledText(main_container, width=120, height=10, font=('Consolas', 8))
+        self.log_text = scrolledtext.ScrolledText(main_container, width=120, height=9, font=('Consolas', 8))
         self.log_text.pack(pady=5, padx=10, fill=tk.BOTH, expand=True)
         
         # Controls
@@ -715,14 +835,12 @@ class NetworkMonitorApp:
         self.view_quarantine_btn.pack(side=tk.LEFT, padx=5)
         
         # Initial log message
-        self.log_message("=" * 80)
         self.log_message("🎯 APT & TROJAN DETECTION SYSTEM - ADMINISTRATOR MODE")
         self.log_message("=" * 80)
         self.log_message("📌 STEP 1: Load AI models using Browse buttons above")
         self.log_message("📌 STEP 2: Click 'START MONITORING' to begin detection")
         self.log_message("📌 STEP 3: Threats will be automatically detected and mitigated")
         self.log_message("=" * 80)
-        self.log_message("")
         
         self.update_statistics_display()
     
@@ -733,10 +851,9 @@ class NetworkMonitorApp:
             self.log_message("⚠️ Auto-Mitigation DISABLED - Threats will only be logged")
     
     def browse_model(self, model_type):
-        """Browse and select model/scaler file."""
-        if model_type == 'scaler':
+        if model_type in ['scaler_trojan', 'scaler_apt']:
             filetypes = [("Pickle files", "*.pkl"), ("All files", "*.*")]
-            title = "Select Scaler File"
+            title = f"Select {model_type.replace('_', ' ').title()} File"
         else:
             filetypes = [("H5 Model files", "*.h5"), ("All files", "*.*")]
             title = f"Select {model_type.upper()} Model File"
@@ -753,9 +870,12 @@ class NetworkMonitorApp:
             elif model_type == 'apt':
                 self.apt_model_path.set(filename)
                 self.log_message(f"📁 Selected APT model: {os.path.basename(filename)}")
-            elif model_type == 'scaler':
-                self.scaler_path.set(filename)
-                self.log_message(f"📁 Selected Scaler: {os.path.basename(filename)}")
+            elif model_type == 'scaler_trojan':
+                self.scaler_trojan_path.set(filename)
+                self.log_message(f"📁 Selected Trojan Scaler: {os.path.basename(filename)}")
+            elif model_type == 'scaler_apt':
+                self.scaler_apt_path.set(filename)
+                self.log_message(f"📁 Selected APT Scaler: {os.path.basename(filename)}")
             
             # Auto-load after selection
             self.reload_model(model_type)
@@ -793,23 +913,37 @@ class NetworkMonitorApp:
                 self.apt_model = load_model(path)
                 self.log_message("✅ APT model loaded successfully!")
                 
-            elif model_type == 'scaler':
-                path = self.scaler_path.get()
+            elif model_type == 'scaler_trojan':
+                path = self.scaler_trojan_path.get()
                 if not path:
-                    messagebox.showwarning("Warning", "Please select Scaler file first!")
+                    messagebox.showwarning("Warning", "Please select Trojan Scaler file first!")
                     return
                 if not os.path.exists(path):
                     messagebox.showerror("Error", f"File not found: {path}")
                     return
                 
-                self.log_message(f"🔄 Loading Scaler from: {os.path.basename(path)}")
-                self.scaler = joblib.load(path)
-                self.log_message("✅ Scaler loaded successfully!")
+                self.log_message(f"🔄 Loading Trojan Scaler from: {os.path.basename(path)}")
+                self.scaler_trojan = joblib.load(path)
+                self.log_message("✅ Trojan Scaler loaded successfully!")
+                
+            elif model_type == 'scaler_apt':
+                path = self.scaler_apt_path.get()
+                if not path:
+                    messagebox.showwarning("Warning", "Please select APT Scaler file first!")
+                    return
+                if not os.path.exists(path):
+                    messagebox.showerror("Error", f"File not found: {path}")
+                    return
+                
+                self.log_message(f"🔄 Loading APT Scaler from: {os.path.basename(path)}")
+                self.scaler_apt = joblib.load(path)
+                self.log_message("✅ APT Scaler loaded successfully!")
             
             self.update_model_status()
             
             # Check if all models loaded
-            if self.trojan_model and self.apt_model and self.scaler:
+            if (self.trojan_model and self.apt_model and 
+                self.scaler_trojan and self.scaler_apt):
                 self.log_message("🎉 ALL MODELS LOADED - Ready to start monitoring!")
                 self.status_var.set("🟢 Ready - Click START MONITORING")
                 messagebox.showinfo("Success", "All AI models loaded successfully!\n\nYou can now start monitoring.")
@@ -841,26 +975,34 @@ class NetworkMonitorApp:
             else:
                 self.log_message(f"⚠️ APT model not found - please use Browse button")
             
-            # Load Scaler
-            if self.scaler_path.get() and os.path.exists(self.scaler_path.get()):
-                self.scaler = joblib.load(self.scaler_path.get())
-                self.log_message(f"✅ Scaler loaded: {os.path.basename(self.scaler_path.get())}")
+            # Load Trojan Scaler
+            if self.scaler_trojan_path.get() and os.path.exists(self.scaler_trojan_path.get()):
+                self.scaler_trojan = joblib.load(self.scaler_trojan_path.get())
+                self.log_message(f"✅ Trojan Scaler loaded: {os.path.basename(self.scaler_trojan_path.get())}")
                 success_count += 1
             else:
-                self.log_message(f"⚠️ Scaler not found - please use Browse button")
+                self.log_message(f"⚠️ Trojan Scaler not found - please use Browse button")
+            
+            # Load APT Scaler
+            if self.scaler_apt_path.get() and os.path.exists(self.scaler_apt_path.get()):
+                self.scaler_apt = joblib.load(self.scaler_apt_path.get())
+                self.log_message(f"✅ APT Scaler loaded: {os.path.basename(self.scaler_apt_path.get())}")
+                success_count += 1
+            else:
+                self.log_message(f"⚠️ APT Scaler not found - please use Browse button")
             
             self.update_model_status()
             
-            if success_count == 3:
+            if success_count == 4:
                 self.log_message("🎉 ALL MODELS LOADED SUCCESSFULLY - Ready to monitor!")
                 self.status_var.set("🟢 Ready - Click START MONITORING")
-                messagebox.showinfo("Success", "All 3 AI models loaded successfully!\n\nYou can now start monitoring.")
+                messagebox.showinfo("Success", "All 4 AI models loaded successfully!\n\nYou can now start monitoring.")
             elif success_count > 0:
-                self.log_message(f"⚠️ Partial load: {success_count}/3 models loaded")
-                messagebox.showwarning("Partial Load", f"Only {success_count}/3 models loaded.\n\nPlease load remaining models using Browse buttons.")
+                self.log_message(f"⚠️ Partial load: {success_count}/4 models loaded")
+                messagebox.showwarning("Partial Load", f"Only {success_count}/4 models loaded.\n\nPlease load remaining models using Browse buttons.")
             else:
                 self.log_message("❌ No models loaded - please use Browse buttons to select model files")
-                messagebox.showerror("Error", "No models found!\n\nPlease use Browse buttons to select:\n- Trojan model (.h5)\n- APT model (.h5)\n- Scaler (.pkl)")
+                messagebox.showerror("Error", "No models found!\n\nPlease use Browse buttons to select:\n- Trojan model (.h5)\n- APT model (.h5)\n- Trojan Scaler (.pkl)\n- APT Scaler (.pkl)")
                 
         except Exception as e:
             self.log_message(f"❌ Error loading models: {str(e)}")
@@ -881,14 +1023,20 @@ class NetworkMonitorApp:
         else:
             missing.append("APT ❌")
         
-        if self.scaler:
-            loaded.append("Scaler ✅")
+        if self.scaler_trojan:
+            loaded.append("Scaler-T ✅")
         else:
-            missing.append("Scaler ❌")
+            missing.append("Scaler-T ❌")
+        
+        if self.scaler_apt:
+            loaded.append("Scaler-A ✅")
+        else:
+            missing.append("Scaler-A ❌")
         
         status_text = "Models: " + " | ".join(loaded + missing)
         
-        if self.trojan_model and self.apt_model and self.scaler:
+        if (self.trojan_model and self.apt_model and 
+            self.scaler_trojan and self.scaler_apt):
             self.model_status_label.config(text=status_text + " - ALL READY! 🎉", foreground="green")
         elif loaded:
             self.model_status_label.config(text=status_text + " - INCOMPLETE ⚠️", foreground="orange")
@@ -928,7 +1076,7 @@ class NetworkMonitorApp:
     
     def update_statistics_display(self):
         """Update the statistics display in GUI."""
-        model_status = "READY ✅" if (self.trojan_model and self.apt_model and self.scaler) else "NOT READY ❌"
+        model_status = "READY ✅" if (self.trojan_model and self.apt_model and self.scaler_trojan and self.scaler_apt) else "NOT READY ❌"
         
         stats = f"""Packets: {self.analyzer.total_packets_captured:,} | Flows: {self.analyzer.total_flows_analyzed:,} | Active: {len(self.analyzer.flows):,}
 Trojan: {self.analyzer.trojan_detections} | APT: {self.analyzer.apt_detections} | Mitigated: {self.analyzer.threats_mitigated}
@@ -1005,24 +1153,49 @@ Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"""
                 
                 self.log_message(f"🔍 Analyzing flow: {flow_id} ({len(flow_packets)} packets)")
                 
-                features = self.analyzer.extract_features(flow_packets)
+                # Extract features for both models
+                features_trojan = self.analyzer.extract_features_trojan(flow_packets)
+                features_apt = self.analyzer.extract_features_apt(flow_packets)
                 
-                if features:
-                    self.log_message(f"   Duration: {features['Flow Duration']:.2f}ms, "
-                                   f"Fwd: {features['Total Fwd Packet']}, "
-                                   f"Bwd: {features['Total Bwd packets']}")
+                if features_trojan and features_apt:
+                    self.log_message(f"   Duration: {features_apt['Flow Duration']:.2f}μs, "
+                                f"Fwd: {features_apt['Total Fwd Packet']}, "
+                                f"Bwd: {features_apt['Total Bwd packets']}")
                     
                     # Check if models are loaded
-                    if not self.trojan_model or not self.apt_model or not self.scaler:
+                    if not self.trojan_model or not self.apt_model or not self.scaler_trojan or not self.scaler_apt:
                         self.log_message("⚠️ Models not loaded - skipping AI detection (flow logged only)")
                         return
-                    
-                    feature_df = pd.DataFrame([features])
-                    X_new = self.scaler.transform(feature_df)
-                    X_new = X_new.reshape((1, 1, X_new.shape[1]))
-                    
-                    trojan_prob = self.trojan_model.predict(X_new, verbose=0)[0][0]
-                    apt_prob = self.apt_model.predict(X_new, verbose=0)[0][0]
+
+                    # Extract features for both models
+                    features_trojan = self.analyzer.extract_features_trojan(flow_packets)
+                    features_apt = self.analyzer.extract_features_apt(flow_packets)
+
+                    if not features_trojan or not features_apt:
+                        self.log_message("⚠️ Feature extraction failed")
+                        return
+
+                    # Prepare Trojan prediction
+                    feature_df_trojan = pd.DataFrame([features_trojan])
+                    if len(feature_df_trojan.columns) != 78:
+                        self.log_message(f"⚠️ Trojan feature mismatch: expected 78, got {len(feature_df_trojan.columns)}")
+                        return
+
+                    X_trojan = self.scaler_trojan.transform(feature_df_trojan)
+                    X_trojan = X_trojan.reshape((1, 1, X_trojan.shape[1]))
+
+                    # Prepare APT prediction
+                    feature_df_apt = pd.DataFrame([features_apt])
+                    if len(feature_df_apt.columns) != 77:
+                        self.log_message(f"⚠️ APT feature mismatch: expected 77, got {len(feature_df_apt.columns)}")
+                        return
+
+                    X_apt = self.scaler_apt.transform(feature_df_apt)
+                    X_apt = X_apt.reshape((1, 1, X_apt.shape[1]))
+
+                    # Predict
+                    trojan_prob = self.trojan_model.predict(X_trojan, verbose=0)[0][0]
+                    apt_prob = self.apt_model.predict(X_apt, verbose=0)[0][0]
                     
                     trojan_pred = 1 if trojan_prob > 0.5 else 0
                     apt_pred = 1 if apt_prob > 0.5 else 0
@@ -1112,7 +1285,7 @@ Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"""
     def start_monitoring(self):
         """Start packet sniffing."""
         # Check if models are loaded
-        if not self.trojan_model or not self.apt_model or not self.scaler:
+        if not self.trojan_model or not self.apt_model or not self.scaler_trojan or not self.scaler_apt:
             response = messagebox.askyesno(
                 "AI Models Not Loaded", 
                 "AI models are not loaded!\n\n"
@@ -1152,7 +1325,7 @@ Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"""
             
             layer_info = "Layer 3" if self.use_layer3 else "Layer 2"
             
-            if self.trojan_model and self.apt_model and self.scaler:
+            if self.trojan_model and self.apt_model and self.scaler_trojan and self.scaler_apt:
                 mode_info = "FULL DETECTION MODE 🎯"
                 mitigation_status = "AUTO-MITIGATION ON 🛡️" if self.auto_mitigate.get() else "DETECTION ONLY ⚠️"
             else:
